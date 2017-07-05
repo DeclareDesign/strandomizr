@@ -42,7 +42,6 @@ if !missing(`"`prob'"') & missing(`"`prob_each'"') {
 	local prob_miss = 1 - `prob'
 	local prob_cum = `prob_miss' + `prob' 
 	local prob_vector `"`prob_miss' `prob_cum'"'
-	disp "`prob_vector'"
 }
 
 if missing(`"`prob'"') & missing(`"`prob_each'"') {
