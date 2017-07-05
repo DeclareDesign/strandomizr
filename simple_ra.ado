@@ -69,9 +69,9 @@ if !missing(`"`prob_each'"') {
 
 
 tokenize `prob_vector'
-gen `assignment'=0 if `stnd_rand'<`1'
+qui gen `assignment'=0 if `stnd_rand'<`1'
 forval i=2/`num_arms'{
-	replace `assignment'=`i'-1 if `stnd_rand'>=`1' & `stnd_rand'<`2'
+	qui replace `assignment'=`i'-1 if `stnd_rand'>=`1' & `stnd_rand'<`2'
 	macro shift
 }	
 
