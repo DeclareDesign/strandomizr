@@ -30,9 +30,9 @@ qui count `if'
 local N=`r(N)'
 *generate random variable for random assignment
 tempvar rand rank stnd_rand
-gen `rand'=runiform()
-egen `rank'=rank(`rand') /*using ranks to maximize closeness to the specified probabilities*/
-gen `stnd_rand'=(`rank'-1)/`N'
+gen `rand'=runiform() `if'
+egen `rank'=rank(`rand') `if' /*using ranks to maximize closeness to the specified probabilities*/
+gen `stnd_rand'=(`rank'-1)/`N' `if' 
 
 
 
