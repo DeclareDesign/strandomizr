@@ -1,0 +1,3 @@
+v 1
+d John Ternovski, Alex Coppock; Yale University
+p simple_ra.ado
