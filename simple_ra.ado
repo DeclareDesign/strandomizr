@@ -7,82 +7,113 @@
 ****Yale University******************
 *************************************
 ****02jul2017************************
-*****version 1.0*********************
+*****version 1.3********************
 ***john.ternovski@yale.edu***********
+
 program define simple_ra
-	version 12
+	version 15
 	syntax namelist(max=1 name=assignment) [if], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [condition_names(string)] [check_inputs] [replace]
-	
-	
-*set default condition names
-if missing(`"`condition_names'"') {
-	local condition_names "0 1"
+
+//determine if condition names are strings or numbers
+//if strings, then use strings as numbers
+//if numbers, use as treatment values
+if !missing(`"`condition_names'"') {
+	tempname stringparse
+	local `stringparse'=subinstr(`"`condition_names'"'," ","",.)
+	cap confirm num ``stringparse''
+	if _rc {
+		local withlabel=1
+	}
 }
-*replace assignment variable and label if replace is specified
+
+//get condition number
+if missing(`"`prob'"') & missing(`"`prob_each'"') & missing(`"`num_arms'"') {
+	local num_arms=2
+}
+if !missing(`"`prob'"') {
+	local num_arms=2
+}
+if !missing(`"`prob_each'"') {
+	local num_arms=wordcount(`"`prob_each'"')
+}
+	
+//set indexing
+if `num_arms'==2 & (!missing(`"`withlabel'"') | missing(`"`condition_names'"')) {
+	local index0=1
+}
+
+//replace assignment variable and label if replace is specified
 if `"`replace'"'!="" {
 	cap drop `assignment'
 	cap label drop `assignment'
-
 }
 
-*get N
+//get N
 qui count `if'
 local N=`r(N)'
-*generate random variable for random assignment
-tempvar rand rank stnd_rand
-gen `rand'=runiform() `if'
-egen `rank'=rank(`rand') `if' /*using ranks to maximize closeness to the specified probabilities*/
-gen `stnd_rand'=(`rank'-1)/`N' `if' 
 
 
 
-
+//get prob vector
 if !missing(`"`prob'"') & missing(`"`prob_each'"') {
 	local num_arms = 2
 	local prob_miss = 1 - `prob'
-	local prob_cum = `prob_miss' + `prob' 
-	local prob_vector `"`prob_miss' `prob_cum'"'
+	local prob_vector `"`prob_miss' `prob'"'
 }
 
 if missing(`"`prob'"') & missing(`"`prob_each'"') {
 	local prob_arm = 1/`num_arms'
-	local prob_cum = `prob_arm'
-	local prob_vector = `prob_cum'
-	forval i=2/`num_arms' {
-		local prob_cum=`prob_cum'+`prob_arm'
-		local prob_vector `"`prob_vector' `prob_cum'"'
+	forval i=1/`num_arms' {
+		local prob_vector `"`prob_vector' `prob_arm'"'
 	}
 }
 
 if !missing(`"`prob_each'"') {
 	local num_arms = wordcount(`"`prob_each'"')
-	tokenize `prob_each'
-	local prob_cum = `1'
-	local prob_vector = `prob_cum'
-	forval i=2/`num_arms' {
-		local prob_cum = `prob_cum' + ``i''
-		local prob_vector `"`prob_vector' `prob_cum'"'
+	local prob_vector `prob_each'
+}
+
+tempname p 
+matrix input `p'=(`prob_vector')
+//randomize
+mata: treat = rdiscrete(strtoreal(st_local("N")),1,st_matrix(st_local("p")))
+getmata `assignment'=treat 
+
+//change values to correspond to custom condition_names values
+if missing(`"`withlabel'"') & !missing(`"`condition_names'"') {
+	tempvar assignment_old
+	rename `assignment' `assignment_old'
+	qui gen `assignment'=.
+	forval i=1/`num_arms' {
+		local cname`i' : word `i' of `condition_names'
+		replace `assignment'=`cname`i'' if `assignment_old'==`i'
 	}
 }
 
-
-
-tokenize `prob_vector'
-qui gen `assignment'=0 if `stnd_rand'<`1'
-forval i=2/`num_arms'{
-	qui replace `assignment'=`i'-1 if `stnd_rand'>=`1' & `stnd_rand'<`2'
-	macro shift
-}	
-
-tokenize `"`condition_names'"'
-label define `assignment' 0 `"`1'"'
-macro shift
-local lengthminusone=`num_arms'-1
-forval i=1/`lengthminusone' {
-	label define `assignment' `i' `"`1'"', add
-	macro shift
+//reindex if necessary
+if `"`index0'"'=="1" {
+	replace `assignment'=`assignment'-1
 }
-label val `assignment' `assignment'
+
+
+//label treatment conditions if necessary
+if `"`withlabel'"'=="1" {
+	tokenize `"`condition_names'"'
+	if `"`index0'"'=="1" {
+		local start=0
+	}
+	else {
+		local start=1
+	}
+	label define `assignment' `start' `"`1'"'
+	macro shift
+	local startplusone=`start'+1
+	forval i=`startplusone'/`num_arms' {
+		label define `assignment' `i' `"`1'"', add
+		macro shift
+	}
+	label val `assignment' `assignment'
+}
 
 end
 
