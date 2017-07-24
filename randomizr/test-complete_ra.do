@@ -1,4 +1,4 @@
-net install randomizr, from(https://raw.githubusercontent.com/DeclareDesign/strandomizr/master/)
+net install randomizr, from(https://raw.githubusercontent.com/DeclareDesign/strandomizr/master/) replace
 ssc install ralpha 
 
 **Complete Random Assignment Tests
