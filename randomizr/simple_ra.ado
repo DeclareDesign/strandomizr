@@ -86,13 +86,13 @@ if missing(`"`withlabel'"') & !missing(`"`condition_names'"') {
 	qui gen `assignment'=.
 	forval i=1/`num_arms' {
 		local cname`i' : word `i' of `condition_names'
-		replace `assignment'=`cname`i'' if `assignment_old'==`i'
+		qui replace `assignment'=`cname`i'' if `assignment_old'==`i'
 	}
 }
 
 //reindex if necessary
 if `"`index0'"'=="1" {
-	replace `assignment'=`assignment'-1
+	qui replace `assignment'=`assignment'-1
 }
 
 
