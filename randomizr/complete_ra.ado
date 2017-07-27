@@ -6,32 +6,28 @@
 ****Alex Coppock*********************
 ****Yale University******************
 *************************************
-****24jul2017************************
-*****version 1.4*********************
+****27jul2017************************
+*****version 1.5*********************
 ***john.ternovski@yale.edu***********
 program define complete_ra, rclass
 	version 15
-	syntax [namelist(max=1 name=assignment)] [if], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [condition_names(string)] [m(numlist max=1 >=0 int)] [m_each(numlist >=0 int)] [check_inputs] [replace]
+	syntax [namelist(max=1 name=assignment)] [if] [in], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [condition_names(string)] [m(numlist max=1 >=0 int)] [m_each(numlist >=0 int)] [check_inputs] [replace]
 
 	
 ///TO DO LIST
-///-add "in" functionality
-///-fix all the if bugs
 ///-add tempnames for all matrices, locals and vars
 ///do ado files have a lot of overhead
 ///LATER: prob of assignment -- obtain condition probabilities function 
-///functionalize labeller
-///functionalize the RA functions	
 
 ///TABLE OF CONTENTS
-///Main Function - LINE 32
-///Labeling Sub-Function - LINE 393
-///Two-arm Random Assignment Function - LINE 415
-///////////////////
+//////Main Function - LINE 30
+//////Labeling Sub-Function - LINE 348
+//////Two-arm Random Assignment Function - LINE 370
+//////Multi-arm Random Assignment Function - LINE 393
 
 ///MAIN FUNCTION//////////////////////////////////	
 //get N
-qui count `if'
+qui count `if' `in'
 local N=`r(N)'
 
 //get condition number
@@ -161,7 +157,7 @@ if /*missing(`"`m_each'"') & missing(`"`prob_each'"') &*/ `num_arms'==2 {
 	if `N'==1 {
 		//neither m nor prob is specified
 		if missing(`"`m'"') & missing(`"`prob'"') {
-			simple_ra `assignment', prob(.5) condition_names(`"`condition_names'"') `replace'
+			simple_ra `assignment' `if' `in', prob(.5) condition_names(`"`condition_names'"') `replace'
 		}
 		//Special Case 2: N=1; m is specified
 		if `"`m'"'=="0" {
@@ -170,16 +166,16 @@ if /*missing(`"`m_each'"') & missing(`"`prob_each'"') &*/ `num_arms'==2 {
 				gen `assignment'=`"`cname1'"'
 			}
 			else {
-				gen `assignment'=0 //MAKE SURE THIS WORKS RIGHT WITH LABELS
+				gen `assignment'=0 
 			}
 		}
 		if `"`m'"'=="1" {
-			simple_ra `assignment', prob(.5) condition_names(`"`condition_names'"') `replace'
+			simple_ra `assignment' `if' `in', prob(.5) condition_names(`"`condition_names'"') `replace'
 		}
 		
 		//Special Case 3: N=1; prob is specified
 		if !missing(`"`prob'"') {
-			simple_ra `assignment', prob(`prob') condition_names(`"`condition_names'"') `replace'			
+			simple_ra `assignment' `if' `in', prob(`prob') condition_names(`"`condition_names'"') `replace'			
 		}
 		return scalar complete=1
 		exit 
@@ -190,13 +186,13 @@ if /*missing(`"`m_each'"') & missing(`"`prob_each'"') &*/ `num_arms'==2 {
 		//Two-arm Design Case 1: m is specified
 		if !missing(`"`m'"') {
 			if `m'==`N' {
-				gen `assignment' = 1 `if' //FIX TREATMENT VARIABLE HERE
+				gen `assignment' = 1 `if' `in'
 				return scalar complete=1
 				exit
 			}
 			
 			//random assignment function
-			two_arm_random_assign_func `assignment', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
+			two_arm_random_assign_func `assignment' `if' `in', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
 			
 			//labeller function
 			ra_labeller `assignment', withlabel(`withlabel') condition_names(`"`condition_names'"') index0(`index0') num_arms(`num_arms') 
@@ -222,7 +218,7 @@ if /*missing(`"`m_each'"') & missing(`"`prob_each'"') &*/ `num_arms'==2 {
 			}
 
 			//random assignment function
-			two_arm_random_assign_func `assignment', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
+			two_arm_random_assign_func `assignment' `if' `in', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
 			
 			//labeller function
 			ra_labeller `assignment', withlabel(`withlabel') condition_names(`"`condition_names'"') index0(`index0') num_arms(`num_arms')
@@ -252,8 +248,9 @@ if /*missing(`"`m_each'"') & missing(`"`prob_each'"') &*/ `num_arms'==2 {
 					local m=`m_ceiling'
 				}
 			}
+
 		//random assignment function
-		two_arm_random_assign_func `assignment', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
+		two_arm_random_assign_func `assignment' `if' `in', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
 		
 		//labeller function
 		ra_labeller `assignment', withlabel(`withlabel') condition_names(`"`condition_names'"') index0(`index0') num_arms(`num_arms')
@@ -282,38 +279,32 @@ if `num_arms'>2 {
 		
 		//setting up matrices, calculating m_each_floor and N_remainder
 		matrix input prob_each=(`prob_each')
+		
 		mata: m_each_floor=floor(st_matrix("prob_each")*strtoreal(st_local("N")))
 		mata: N_remainder=strofreal(strtoreal(st_local("N"))-rowsum(m_each_floor))
 		mata: st_local("N_remainder",N_remainder)
 		mata: st_matrix("m_each_floor",m_each_floor)
-				
-		//rankng function 
-		tempvar rand rank 
-		qui gen `rand'=runiform() `if'
-		qui egen `rank'=rank(`rand') `if'
-		qui gen `assignment'=1 if `rank'<=m_each_floor[1,1]
 		
+		//set up m_each inputs 
+		local m_each_vector ""
+		local length=wordcount(`"`prob_each'"') 
+		forval i=1/`length' {
+			local m`i'=m_each_floor[1,`i']
+			local m_each_vector `m_each_vector' `m`i'' 
+		}
+		
+		//actual random assignment function 
+		tempvar rand rank 
+		qui gen `rand'=runiform() `if' `in'
+		qui egen `rank'=rank(`rand') `if' `in'
+		multi_arm_random_assign_func `assignment' `if' `in', m_each(`m_each_vector') rank(`rank')		
+		
+		//assign remainder if necessary 
 		if `N_remainder'>0 {
 			mata: prob_each_fix_up=((st_matrix("prob_each")*strtoreal(st_local("N"))) - m_each_floor)/strtoreal(N_remainder)
-			mata: st_matrix("prob_each_fix_up", prob_each_fix_up)
-			
-			//setting up while loop
-			local begin=m_each_floor[1,1]
-			local end=(m_each_floor[1,1]+m_each_floor[1,2])
-			local i=2
-			local length=wordcount(`"`prob_each'"') 
-			
-			//while loop for assigning treatment
-			while `i'!=(`length'+1) {
-				qui replace `assignment'=`i' if `rank'>`begin' & `rank'<=`end'
-				local i=`i'+1
-				local begin=`end'
-				local end=`begin'+m_each_floor[1,`i']
-			}	
-			
-			//assign remainder
 			mata: st_matrix("remain_asn",rdiscrete(strtoreal(N_remainder),1,prob_each_fix_up))
-			
+	
+			local begin=`r(end)'
 			local i=1
 			local end=`begin'+1
 			while `i'!=(1+`N_remainder') {
@@ -322,54 +313,17 @@ if `num_arms'>2 {
 				local begin=`end'
 				local end=`begin'+`i'
 			}
+
 		}
-		
-		else {
-			//setting up while loop
-			local begin=m_each_floor[1,1]
-			local end=(m_each_floor[1,1]+m_each_floor[1,2])
-			local i=2
-			local length=wordcount(`"`prob_each'"') 
-			
-			//while loop for assigning treatment
-			while `i'!=(`length'+1) {
-				qui replace `assignment'=`i' if `rank'>`begin' & `rank'<=`end'
-				local i=`i'+1
-				local begin=`end'
-				local end=`begin'+m_each_floor[1,`i']
-			}	
-		}
-		
-		
+		return scalar complete=1		
 	}
 
 	if !missing(`"`m_each'"') {
-		//rankng function 
-		tempvar rand rank 
-		qui gen `rand'=runiform() `if'
-		qui egen `rank'=rank(`rand') `if'  
-
-		//setting up while loop
-
-		tokenize `m_each'
-		local begin=`1'
-		local end=(`1'+`2')
-		local i=2
-		qui gen `assignment'=1 if `rank'<=`begin'
-		local length=wordcount(`"`*'"') 
-
-		//while loop for assigning treatment
-		while `i'!=(`length'+1) {
-			local end=`begin'+``i''
-			qui replace `assignment'=`i' if `rank'>`begin' & `rank'<=`end'
-			local i=`i'+1
-			local begin=`end'
-
-		}	
+		multi_arm_random_assign_func `assignment' `if' `in', m_each(`m_each')
+		return scalar complete=1
 	}
 }
 
-return scalar complete=1
 
 //change values to correspond to custom condition_names values
 if missing(`"`withlabel'"') & !missing(`"`condition_names'"') {
@@ -415,12 +369,11 @@ end
 ///TWO ARM RANDOM ASSIGNMENT FUNCTION
 program define two_arm_random_assign_func
 	version 15
-	syntax [namelist(name=assignment)], [customnum(numlist)] [condition_names(string)] [m(numlist)]
-
+	syntax [namelist(name=assignment)] [if] [in], [customnum(numlist)] [condition_names(string)] [m(numlist)]
 
 tempvar rand rank 
-qui gen `rand'=runiform() `if'
-qui egen `rank'=rank(`rand') `if' 
+qui gen `rand'=runiform() `if' `in' 
+qui egen `rank'=rank(`rand') `if' `in'
 if !missing(`"`customnum'"') {
 	local cname1 : word 1 of `condition_names'
 	local cname2 : word 2 of `condition_names'
@@ -429,13 +382,43 @@ else {
 	local cname1=0
 	local cname2=1
 }			
-qui gen `assignment'=`cname1' 
+qui gen `assignment'=`cname1' `if' `in'
 qui replace `assignment'=`cname2' if `rank'<=`m' 
 
 end
 *
 
+///MULTI ARM RANDOM ASSIGNMENT FUNCTION
+program define multi_arm_random_assign_func, rclass
+version 15
+syntax namelist(name=assignment) [if] [in], m_each(numlist) [rank(varlist)]
+	
+if missing(`"`rank'"') {
+	tempvar rand rank 
+	qui gen `rand'=runiform() `if' `in'
+	qui egen `rank'=rank(`rand') `if' `in' 
+}
 
+tokenize `m_each'
+
+local begin=`1'
+local end=(`1'+`2')
+local i=2
+qui gen `assignment'=1 if `rank'<=`begin'
+local length=wordcount(`"`*'"') 
+//while loop for assigning treatment
+while `i'!=(`length'+1) {
+	local end=`begin'+``i''
+	qui replace `assignment'=`i' if `rank'>`begin' & `rank'<=`end'
+	local i=`i'+1
+	local begin=`end'
+
+}	
+
+return scalar end=`begin'
+
+end
+*
 
 
 *	
