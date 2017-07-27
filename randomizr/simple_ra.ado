@@ -6,13 +6,13 @@
 ****Alex Coppock*********************
 ****Yale University******************
 *************************************
-****02jul2017************************
-*****version 1.3********************
+****27jul2017************************
+*****version 1.4********************
 ***john.ternovski@yale.edu***********
 
 program define simple_ra
 	version 15
-	syntax namelist(max=1 name=assignment) [if], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [condition_names(string)] [check_inputs] [replace]
+	syntax namelist(max=1 name=assignment) [if] [in], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [condition_names(string)] [check_inputs] [replace]
 
 //determine if condition names are strings or numbers
 //if strings, then use strings as numbers
@@ -49,7 +49,7 @@ if `"`replace'"'!="" {
 }
 
 //get N
-qui count `if'
+qui count `if' `in'
 local N=`r(N)'
 
 
@@ -73,11 +73,15 @@ if !missing(`"`prob_each'"') {
 	local prob_vector `prob_each'
 }
 
-tempname p 
+//set up for mata input
+tempname p id 
 matrix input `p'=(`prob_vector')
+gen `id'=_n 
+qui putmata `id' `if' `in', replace
+
 //randomize
 mata: treat = rdiscrete(strtoreal(st_local("N")),1,st_matrix(st_local("p")))
-getmata `assignment'=treat 
+getmata `assignment'=treat, id(`id') 
 
 //change values to correspond to custom condition_names values
 if missing(`"`withlabel'"') & !missing(`"`condition_names'"') {
