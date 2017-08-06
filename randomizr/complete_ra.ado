@@ -6,12 +6,12 @@
 ****Alex Coppock*********************
 ****Yale University******************
 *************************************
-****27jul2017************************
-*****version 1.5*********************
+****05aug2017************************
+*****version 1.7*********************
 ***john.ternovski@yale.edu***********
-program define complete_ra, rclass
+program define complete_ra, rclass byable(recall)
 	version 15
-	syntax [namelist(max=1 name=assignment)] [if] [in], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [condition_names(string)] [m(numlist max=1 >=0 int)] [m_each(numlist >=0 int)] [check_inputs] [replace]
+	syntax [namelist(max=1 name=assignment)] [if] [in], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [condition_names(string)] [m(numlist max=1 >=0 int)] [m_each(numlist >=0 int)] [skip_check_inputs] [replace]
 
 	
 ///TO DO LIST
@@ -20,14 +20,23 @@ program define complete_ra, rclass
 ///LATER: prob of assignment -- obtain condition probabilities function 
 
 ///TABLE OF CONTENTS
-//////Main Function - LINE 30
-//////Labeling Sub-Function - LINE 348
-//////Two-arm Random Assignment Function - LINE 370
-//////Multi-arm Random Assignment Function - LINE 393
+//////Main Function - LINE 28
+//////Labeling Sub-Function - LINE 352
+//////Two-arm Random Assignment Function - LINE 374
+//////Multi-arm Random Assignment Function - LINE 396
 
-///MAIN FUNCTION//////////////////////////////////	
+///MAIN FUNCTION//////////////////////////////////
+
+//Fixing ifs when have bys
+if !missing(`"`if'"') {
+	local andif=`"&"'+substr(`"`if'"',3,.)
+}
+
+//allow byable 
+marksample touse 
+
 //get N
-qui count `if' `in'
+qui count `in' if `touse'==1 `andif'
 local N=`r(N)'
 
 //get condition number
@@ -70,7 +79,6 @@ if `num_arms'==2 & !missing(`"`withlabel'"') {
 }
 
 
-	
 //error checking
 if "`skip_check_inputs'"=="" {
 	if !missing(`"`prob_each'"'){
@@ -101,10 +109,10 @@ if "`skip_check_inputs'"=="" {
 	}
 	
 	//insufficient number of condition names for the number of conditions specified	
-	if !missing(`"`m_each'"') & !missing(`"`condition_names'"') {
+	if (!missing(`"`m_each'"') | !missing(`"`num_arms'"')) & !missing(`"`condition_names'"') {
 		local margs=wordcount(`"`m_each'"')
 		local cargs=wordcount(`"`condition_names'"')
-		if `margs'>`cargs' {
+		if `margs'>`cargs' | `num_arms'>`cargs' {
 			disp as error "ERROR: You specified too few condition names"
 			exit 
 		}
@@ -117,29 +125,30 @@ if "`skip_check_inputs'"=="" {
 			exit
 		}
 	}
+	disp "Error checking complete"
 
 }
 
-disp "Error checking complete"
-
 
 //setting defaults 
-
 //set default condition names
 if missing(`"`assignment'"') { 
 	local assignment "assignment"
 }
 
+if _byindex()<=1 {	
+	//replace assignment variable and label if replace is specified
+	if `"`replace'"'!="" {
+		cap drop `assignment'
+		if _N==0 {
+			qui set obs `N'
+		}
+		cap label drop `assignment'
 
-//replace assignment variable and label if replace is specified
-if `"`replace'"'!="" {
-	cap drop `assignment'
-	if _N==0 {
-		qui set obs `N'
 	}
-	cap label drop `assignment'
-
+	qui gen `assignment'=.
 }
+tempvar assignmenttemp
 
 
 //detect if two-arm design
@@ -152,33 +161,36 @@ if !missing(`"`prob_each'"') & `num_arms'==2 {
 
 
 //Simple 2 group design, returns zeros and ones
-if /*missing(`"`m_each'"') & missing(`"`prob_each'"') &*/ `num_arms'==2 {
+if `num_arms'==2 {
 	//Special Case 1: N=1
 	if `N'==1 {
 		//neither m nor prob is specified
 		if missing(`"`m'"') & missing(`"`prob'"') {
-			simple_ra `assignment' `if' `in', prob(.5) condition_names(`"`condition_names'"') `replace'
+			simple_ra `assignmenttemp' `in' if `touse'==1 `andif', prob(.5) condition_names(`"`condition_names'"') `replace'
+			qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 		}
 		//Special Case 2: N=1; m is specified
 		if `"`m'"'=="0" {
-			if !missing(`"`condition_names'"'){
+			if !missing(`"`condition_names'"') & !missing(`"`customnum'"') {
 				local cname1 : word 1 of `condition_names'
-				gen `assignment'=`"`cname1'"'
+				//fix strings and numbers here
+				replace `assignment'=`cname1' if `touse'==1 `andif' `in'
 			}
 			else {
-				gen `assignment'=0 
+				replace `assignment'=0 if `touse'==1 `andif' `in'
 			}
 		}
 		if `"`m'"'=="1" {
-			simple_ra `assignment' `if' `in', prob(.5) condition_names(`"`condition_names'"') `replace'
+			simple_ra `assignmenttemp' `in' if `touse'==1 `andif', prob(.5) condition_names(`"`condition_names'"') `replace'
+			qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 		}
 		
 		//Special Case 3: N=1; prob is specified
 		if !missing(`"`prob'"') {
-			simple_ra `assignment' `if' `in', prob(`prob') condition_names(`"`condition_names'"') `replace'			
+			simple_ra `assignmenttemp' `in' if `touse'==1 `andif', prob(`prob') condition_names(`"`condition_names'"') `replace'			
+			qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 		}
 		return scalar complete=1
-		exit 
 	}
 
 	//Two-arm Design 
@@ -186,18 +198,15 @@ if /*missing(`"`m_each'"') & missing(`"`prob_each'"') &*/ `num_arms'==2 {
 		//Two-arm Design Case 1: m is specified
 		if !missing(`"`m'"') {
 			if `m'==`N' {
-				gen `assignment' = 1 `if' `in'
+				gen `assignment' = 1 `in' if `touse'==1 `andif'
 				return scalar complete=1
-				exit
 			}
-			
-			//random assignment function
-			two_arm_random_assign_func `assignment' `if' `in', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
-			
-			//labeller function
-			ra_labeller `assignment', withlabel(`withlabel') condition_names(`"`condition_names'"') index0(`index0') num_arms(`num_arms') 
-			return scalar complete=1
-			exit
+			else {
+				//random assignment function
+				two_arm_random_assign_func `assignmenttemp' `in' if `touse'==1 `andif', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
+				qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
+				return scalar complete=1
+			}
 		}
 		
 		//Case 2: Neither m nor prob is specified
@@ -218,16 +227,13 @@ if /*missing(`"`m_each'"') & missing(`"`prob_each'"') &*/ `num_arms'==2 {
 			}
 
 			//random assignment function
-			two_arm_random_assign_func `assignment' `if' `in', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
-			
-			//labeller function
-			ra_labeller `assignment', withlabel(`withlabel') condition_names(`"`condition_names'"') index0(`index0') num_arms(`num_arms')
+			two_arm_random_assign_func `assignmenttemp' `in' if `touse'==1 `andif', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
+			qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 			return scalar complete=1
-			exit 			
 		}
 
 	//Two-arm Design Case 3: prob is specified
-		if !missing(`"`prob'"') {
+		else if !missing(`"`prob'"') {
 			local m_floor = floor(`N'*`prob')
 			local m_ceiling = ceil(`N'*`prob')
 			
@@ -250,19 +256,15 @@ if /*missing(`"`m_each'"') & missing(`"`prob_each'"') &*/ `num_arms'==2 {
 			}
 
 		//random assignment function
-		two_arm_random_assign_func `assignment' `if' `in', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
-		
-		//labeller function
-		ra_labeller `assignment', withlabel(`withlabel') condition_names(`"`condition_names'"') index0(`index0') num_arms(`num_arms')
+		two_arm_random_assign_func `assignmenttemp' `in' if `touse'==1 `andif', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
+		qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 		return scalar complete=1
-		exit 			
 		}
 			
 	}	
 }
 
-
-//Multi-arm Designs
+	//Multi-arm Designs
 
 //Multi-arm Design Case 1: neither prob_each nor m_each specified
 if `num_arms'>2 {
@@ -295,10 +297,11 @@ if `num_arms'>2 {
 		
 		//actual random assignment function 
 		tempvar rand rank 
-		qui gen `rand'=runiform() `if' `in'
-		qui egen `rank'=rank(`rand') `if' `in'
-		multi_arm_random_assign_func `assignment' `if' `in', m_each(`m_each_vector') rank(`rank')		
-		
+		qui gen `rand'=runiform() `in' if `touse'==1 `andif'
+		qui egen `rank'=rank(`rand') `in' if `touse'==1 `andif'
+		multi_arm_random_assign_func `assignmenttemp' `in' if `touse'==1 `andif', m_each(`m_each_vector') rank(`rank')		
+		qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
+
 		//assign remainder if necessary 
 		if `N_remainder'>0 {
 			mata: prob_each_fix_up=((st_matrix("prob_each")*strtoreal(st_local("N"))) - m_each_floor)/strtoreal(N_remainder)
@@ -308,7 +311,7 @@ if `num_arms'>2 {
 			local i=1
 			local end=`begin'+1
 			while `i'!=(1+`N_remainder') {
-				qui replace `assignment'=remain_asn[`i',1] if `rank'>`begin' & `rank'<=`end'
+				qui replace `assignment'=remain_asn[`i',1] if `touse'==1 & `rank'>`begin' & `rank'<=`end'
 				local i=`i'+1
 				local begin=`end'
 				local end=`begin'+`i'
@@ -319,27 +322,28 @@ if `num_arms'>2 {
 	}
 
 	if !missing(`"`m_each'"') {
-		multi_arm_random_assign_func `assignment' `if' `in', m_each(`m_each')
+		multi_arm_random_assign_func `assignmenttemp' `in' if `touse'==1 `andif', m_each(`m_each')
+		qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 		return scalar complete=1
 	}
 }
 
-
-//change values to correspond to custom condition_names values
-if missing(`"`withlabel'"') & !missing(`"`condition_names'"') {
-	tempvar assignment_old
-	rename `assignment' `assignment_old'
-	qui gen `assignment'=.
-	forval i=1/`num_arms' {
-		local cname`i' : word `i' of `condition_names'
-		qui replace `assignment'=`cname`i'' if `assignment_old'==`i'
+if _bylastcall() {
+	//change values to correspond to custom condition_names values
+	if missing(`"`withlabel'"') & !missing(`"`condition_names'"') {
+		tempvar assignment_old
+		rename `assignment' `assignment_old'
+		qui gen `assignment'=.
+		forval i=1/`num_arms' {
+			local cname`i' : word `i' of `condition_names'
+			qui replace `assignment'=`cname`i'' if `assignment_old'==`i'
+		}
 	}
+
+
+	//label treatment conditions if necessary
+	ra_labeller `assignment', withlabel(`withlabel') condition_names(`"`condition_names'"') index0(`index0') num_arms(`num_arms')
 }
-
-
-//label treatment conditions if necessary
-ra_labeller `assignment', withlabel(`withlabel') condition_names(`"`condition_names'"') index0(`index0') num_arms(`num_arms')
-
 
 end
 
@@ -375,8 +379,8 @@ tempvar rand rank
 qui gen `rand'=runiform() `if' `in' 
 qui egen `rank'=rank(`rand') `if' `in'
 if !missing(`"`customnum'"') {
-	local cname1 : word 1 of `condition_names'
-	local cname2 : word 2 of `condition_names'
+	local cname1=1 /*: word 1 of `condition_names'*/
+	local cname2=2 /*: word 2 of `condition_names'*/
 }
 else {
 	local cname1=0
