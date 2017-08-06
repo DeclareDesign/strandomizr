@@ -1,3 +1,5 @@
 f randomizr/complete_ra.ado
+f randomizr/test-complete_ra.do
 f randomizr/simple_ra.ado
 f randomizr/block_ra.ado
+f randomizr/test-block_ra.do
