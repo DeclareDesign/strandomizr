@@ -1,5 +1,11 @@
-f randomizr/complete_ra.ado
-f randomizr/test-complete_ra.do
-f randomizr/simple_ra.ado
-f randomizr/block_ra.ado
-f randomizr/test-block_ra.do
+f strandomizr/simple_ra.ado
+f strandomizr/block_ra.ado
+f strandomizr/simple_ra.sthlp
+f strandomizr/block_ra.sthlp
+f strandomizr/complete_ra.ado
+f strandomizr/cluster_ra.ado
+f strandomizr/complete_ra.sthlp
+f strandomizr/cluster_ra.sthlp
+f strandomizr/block_and_cluster_ra.ado
+f strandomizr/block_and_cluster_ra.sthlp
+
