@@ -337,18 +337,6 @@ padding-right:20px;
 <p>The only required argument to block_ra is block_var, which is a variable that describes w hich block a unit belongs to. block_var can be a string or numeric variable. If no other arguments a re specified, block_ra assigns an approximately equal proportion of each block to treatment.</p>
 <pre><code>      .  block_ra Z, block_var(Hair) replace
       
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Black
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Brown
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Red
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Blond
-      
       . tab Z Hair
       
                  |                    Hair
@@ -364,19 +352,6 @@ padding-right:20px;
 <p>For multiple treatment arms, use the num_arms argument, with or without the condition_nam es argument</p>
 <pre><code>      .  block_ra Z, block_var(Hair) num_arms(3) replace
       
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Black
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Brown
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Red
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Blond
-      
-      
       . tab Z Hair
       
                  |                    Hair
@@ -391,27 +366,14 @@ padding-right:20px;
       
       . block_ra Z, block_var(Hair) condition_names(Control Placebo Treatment) replace
       
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Black
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Brown
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Red
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Blond
-      
-      
       . tab Z Hair
       
                  |                    Hair
                Z |     Black      Brown        Red      Blond |     Total
       -----------+--------------------------------------------+----------
-               1 |        36         96         23         42 |       197 
-               2 |        36         95         23         43 |       197 
-               3 |        36         95         25         42 |       198 
+         Control |        36         96         23         42 |       197 
+         Placebo |        36         95         23         43 |       197 
+       Treatment |        36         95         25         42 |       198 
       -----------+--------------------------------------------+----------
            Total |       108        286         71        127 |       592 
       
@@ -419,19 +381,6 @@ padding-right:20px;
       </code></pre>
 <p>block_ra provides a number of ways to adjust the number of subjects assigned to each cond itions. The prob_each argument describes what proportion of each block should be assigned to treatmen t arm. Note of course, that block_ra still uses complete random assignment within each block; the app ropriate number of units to assign to treatment within each block is automatically determined.</p>
 <pre><code>      .  block_ra Z, block_var(Hair) prob_each(.3 .7) replace
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Black
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Brown
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Red
-      
-      ------------------------------------------------------------------------------------------
-      -&gt; Hair = Blond
-      
       
       . tab Z Hair
       
@@ -494,6 +443,320 @@ padding-right:20px;
                1 |        78        186         51         87 |       402 
       -----------+--------------------------------------------+----------
            Total |       108        286         71        127 |       592 
+      
+      
+      </code></pre>
+<h2 id="clustered-assignment">Clustered Assignment</h2>
+<p>Clustered assignment is unfortunate. If you can avoid assigning subjects to treatments by cluster, you should. Sometimes, clustered assignment is unavoidable. Some common situations include:</p>
+<ol style="list-style-type: decimal">
+<li>Housemates in households: whole households are assigned to treatment or control</li>
+<li>Students in classrooms: whole classrooms are assigned to treatment or control</li>
+<li>Residents in towns or villages: whole communities are assigned to treatment or control</li>
+</ol>
+<p>Clustered assignment decreases the effective sample size of an experiment. In the extreme case when outcomes are perfectly correlated with clusters, the experiment has an effective sample s ize equal to the number of clusters. When outcomes are perfectly uncorrelated with clusters, the effective sample size is equal to the number of subjects. Almost all cluster-assigned experiments fall somewher e in the middle of these two extremes.</p>
+<p>The only required argument for the cluster_ra function is the clust_var argument, which i ndicates which cluster each subject belongs to. Let's pretend that for some reason, we have to assign tr eatments according to the unique combinations of hair color, eye color, and gender.</p>
+<pre><code>      .  egen clust_var=group(Hair Eye Sex)
+      
+      . tab clust_var
+      
+       group(Hair |
+         Eye Sex) |      Freq.     Percent        Cum.
+      ------------+-----------------------------------
+                1 |         32        5.41        5.41
+                2 |         36        6.08       11.49
+                3 |         11        1.86       13.34
+                4 |          9        1.52       14.86
+                5 |         10        1.69       16.55
+                6 |          5        0.84       17.40
+                7 |          3        0.51       17.91
+                8 |          2        0.34       18.24
+                9 |         53        8.95       27.20
+               10 |         66       11.15       38.34
+               11 |         50        8.45       46.79
+               12 |         34        5.74       52.53
+               13 |         25        4.22       56.76
+               14 |         29        4.90       61.66
+               15 |         15        2.53       64.19
+               16 |         14        2.36       66.55
+               17 |         10        1.69       68.24
+               18 |         16        2.70       70.95
+               19 |         10        1.69       72.64
+               20 |          7        1.18       73.82
+               21 |          7        1.18       75.00
+               22 |          7        1.18       76.18
+               23 |          7        1.18       77.36
+               24 |          7        1.18       78.55
+               25 |          3        0.51       79.05
+               26 |          4        0.68       79.73
+               27 |         30        5.07       84.80
+               28 |         64       10.81       95.61
+               29 |          5        0.84       96.45
+               30 |          5        0.84       97.30
+               31 |          8        1.35       98.65
+               32 |          8        1.35      100.00
+      ------------+-----------------------------------
+            Total |        592      100.00
+      
+      . cluster_ra Z_clust, cluster_var(clust_var) 
+      
+      . tab clust_var Z_clust
+      
+      group(Hair |        Z_clust
+        Eye Sex) |         0          1 |     Total
+      -----------+----------------------+----------
+               1 |        32          0 |        32 
+               2 |        36          0 |        36 
+               3 |        11          0 |        11 
+               4 |         9          0 |         9 
+               5 |         0         10 |        10 
+               6 |         5          0 |         5 
+               7 |         0          3 |         3 
+               8 |         2          0 |         2 
+               9 |        53          0 |        53 
+              10 |         0         66 |        66 
+              11 |        50          0 |        50 
+              12 |         0         34 |        34 
+              13 |         0         25 |        25 
+              14 |         0         29 |        29 
+              15 |         0         15 |        15 
+              16 |        14          0 |        14 
+              17 |         0         10 |        10 
+              18 |         0         16 |        16 
+              19 |         0         10 |        10 
+              20 |         0          7 |         7 
+              21 |         0          7 |         7 
+              22 |         7          0 |         7 
+              23 |         7          0 |         7 
+              24 |         7          0 |         7 
+              25 |         0          3 |         3 
+              26 |         4          0 |         4 
+              27 |        30          0 |        30 
+              28 |        64          0 |        64 
+              29 |         5          0 |         5 
+              30 |         0          5 |         5 
+              31 |         0          8 |         8 
+              32 |         0          8 |         8 
+      -----------+----------------------+----------
+           Total |       336        256 |       592 
+      
+      
+      </code></pre>
+<p>This shows that each cluster is either assigned to treatment or control. No two units wit hin the same cluster are assigned to different conditions.</p>
+<p>As with all functions in randomizr, you can specify multiple treatment arms in a variety of ways:</p>
+<pre><code>      .  cluster_ra Z_clust, cluster_var(clust_var) num_arms(3) replace
+      
+      
+      . tab clust_var Z_clust
+      
+      group(Hair |             Z_clust
+        Eye Sex) |         1          2          3 |     Total
+      -----------+---------------------------------+----------
+               1 |        32          0          0 |        32 
+               2 |        36          0          0 |        36 
+               3 |         0          0         11 |        11 
+               4 |         9          0          0 |         9 
+               5 |        10          0          0 |        10 
+               6 |         0          0          5 |         5 
+               7 |         0          3          0 |         3 
+               8 |         0          0          2 |         2 
+               9 |         0         53          0 |        53 
+              10 |        66          0          0 |        66 
+              11 |         0         50          0 |        50 
+              12 |         0         34          0 |        34 
+              13 |         0          0         25 |        25 
+              14 |         0          0         29 |        29 
+              15 |         0         15          0 |        15 
+              16 |        14          0          0 |        14 
+              17 |         0          0         10 |        10 
+              18 |         0          0         16 |        16 
+              19 |         0         10          0 |        10 
+              20 |         0          7          0 |         7 
+              21 |         7          0          0 |         7 
+              22 |         7          0          0 |         7 
+              23 |         0          0          7 |         7 
+              24 |         0          0          7 |         7 
+              25 |         3          0          0 |         3 
+              26 |         0          4          0 |         4 
+              27 |         0         30          0 |        30 
+              28 |        64          0          0 |        64 
+              29 |         0          0          5 |         5 
+              30 |         0          5          0 |         5 
+              31 |         0          0          8 |         8 
+              32 |         0          8          0 |         8 
+      -----------+---------------------------------+----------
+           Total |       248        219        125 |       592 
+      
+      
+      </code></pre>
+<p>...or using condition_names.</p>
+<pre><code>      .  cluster_ra Z_clust, cluster_var(clust_var) condition_names(control placebo treatment)  replace
+      
+      
+      . tab clust_var Z_clust
+      
+      group(Hair |             Z_clust
+        Eye Sex) |         1          2          3 |     Total
+      -----------+---------------------------------+----------
+               1 |        32          0          0 |        32 
+               2 |         0          0         36 |        36 
+               3 |         0          0         11 |        11 
+               4 |         0          0          9 |         9 
+               5 |        10          0          0 |        10 
+               6 |         0          0          5 |         5 
+               7 |         3          0          0 |         3 
+               8 |         0          2          0 |         2 
+               9 |         0         53          0 |        53 
+              10 |         0         66          0 |        66 
+              11 |        50          0          0 |        50 
+              12 |        34          0          0 |        34 
+              13 |        25          0          0 |        25 
+              14 |         0         29          0 |        29 
+              15 |         0          0         15 |        15 
+              16 |         0         14          0 |        14 
+              17 |         0          0         10 |        10 
+              18 |         0         16          0 |        16 
+              19 |         0         10          0 |        10 
+              20 |         7          0          0 |         7 
+              21 |         0          7          0 |         7 
+              22 |         0          7          0 |         7 
+              23 |         7          0          0 |         7 
+              24 |         0          0          7 |         7 
+              25 |         3          0          0 |         3 
+              26 |         0          0          4 |         4 
+              27 |         0          0         30 |        30 
+              28 |        64          0          0 |        64 
+              29 |         5          0          0 |         5 
+              30 |         0          5          0 |         5 
+              31 |         0          0          8 |         8 
+              32 |         0          8          0 |         8 
+      -----------+---------------------------------+----------
+           Total |       240        217        135 |       592 
+      
+      
+      </code></pre>
+<p>... or using m_each, which describes how many clusters should be assigned to each conditi on. m_each must sum to the number of clusters.</p>
+<pre><code>      .  cluster_ra Z_clust, cluster_var(clust_var) m_each(5 15 12) replace
+      
+      
+      . tab clust_var Z_clust
+      
+      group(Hair |             Z_clust
+        Eye Sex) |         1          2          3 |     Total
+      -----------+---------------------------------+----------
+               1 |         0         32          0 |        32 
+               2 |         0          0         36 |        36 
+               3 |         0          0         11 |        11 
+               4 |         0          0          9 |         9 
+               5 |         0         10          0 |        10 
+               6 |         5          0          0 |         5 
+               7 |         0          0          3 |         3 
+               8 |         0          2          0 |         2 
+               9 |         0         53          0 |        53 
+              10 |         0         66          0 |        66 
+              11 |         0          0         50 |        50 
+              12 |         0          0         34 |        34 
+              13 |         0          0         25 |        25 
+              14 |         0          0         29 |        29 
+              15 |         0         15          0 |        15 
+              16 |         0          0         14 |        14 
+              17 |         0          0         10 |        10 
+              18 |         0          0         16 |        16 
+              19 |         0         10          0 |        10 
+              20 |         0          7          0 |         7 
+              21 |         0          7          0 |         7 
+              22 |         7          0          0 |         7 
+              23 |         0          7          0 |         7 
+              24 |         7          0          0 |         7 
+              25 |         0          3          0 |         3 
+              26 |         4          0          0 |         4 
+              27 |         0         30          0 |        30 
+              28 |         0          0         64 |        64 
+              29 |         0          5          0 |         5 
+              30 |         5          0          0 |         5 
+              31 |         0          8          0 |         8 
+              32 |         0          8          0 |         8 
+      -----------+---------------------------------+----------
+           Total |        28        263        301 |       592 
+      
+      
+      </code></pre>
+<h2 id="block-and-clustered-assignment">Block and Clustered Assignment</h2>
+<p>The power of clustered experiments can sometimes be improved through blocking. In this sc enario, whole clusters are members of a particular block -- imagine villages nested within discrete reg ions, or classrooms nested within discrete schools.</p>
+<p>As an example, let's group our clusters into blocks by size</p>
+<pre><code>      .  bysort clust_var: egen cluster_size=count(_n)
+      
+      . block_and_cluster_ra Z, block_var(cluster_size) cluster_var(clust_var) replace
+      
+      . tab clust_var Z
+      
+      group(Hair |           Z
+        Eye Sex) |         0          1 |     Total
+      -----------+----------------------+----------
+               1 |        32          0 |        32 
+               2 |         0         36 |        36 
+               3 |         0         11 |        11 
+               4 |         0          9 |         9 
+               5 |         0         10 |        10 
+               6 |         0          5 |         5 
+               7 |         0          3 |         3 
+               8 |         0          2 |         2 
+               9 |        53          0 |        53 
+              10 |         0         66 |        66 
+              11 |         0         50 |        50 
+              12 |         0         34 |        34 
+              13 |         0         25 |        25 
+              14 |        29          0 |        29 
+              15 |         0         15 |        15 
+              16 |        14          0 |        14 
+              17 |        10          0 |        10 
+              18 |        16          0 |        16 
+              19 |         0         10 |        10 
+              20 |         7          0 |         7 
+              21 |         0          7 |         7 
+              22 |         0          7 |         7 
+              23 |         7          0 |         7 
+              24 |         7          0 |         7 
+              25 |         3          0 |         3 
+              26 |         4          0 |         4 
+              27 |        30          0 |        30 
+              28 |         0         64 |        64 
+              29 |         0          5 |         5 
+              30 |         5          0 |         5 
+              31 |         8          0 |         8 
+              32 |         0          8 |         8 
+      -----------+----------------------+----------
+           Total |       225        367 |       592 
+      
+      
+      . tab cluster_size Z 
+      
+      cluster_si |           Z
+              ze |         0          1 |     Total
+      -----------+----------------------+----------
+               2 |         0          2 |         2 
+               3 |         3          3 |         6 
+               4 |         4          0 |         4 
+               5 |         5         10 |        15 
+               7 |        21         14 |        35 
+               8 |         8          8 |        16 
+               9 |         0          9 |         9 
+              10 |        10         20 |        30 
+              11 |         0         11 |        11 
+              14 |        14          0 |        14 
+              15 |         0         15 |        15 
+              16 |        16          0 |        16 
+              25 |         0         25 |        25 
+              29 |        29          0 |        29 
+              30 |        30          0 |        30 
+              32 |        32          0 |        32 
+              34 |         0         34 |        34 
+              36 |         0         36 |        36 
+              50 |         0         50 |        50 
+              53 |        53          0 |        53 
+              64 |         0         64 |        64 
+              66 |         0         66 |        66 
+      -----------+----------------------+----------
+           Total |       225        367 |       592 
       
       
       </code></pre>
