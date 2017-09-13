@@ -37,29 +37,28 @@ set obs 350
 gen cluster=runiformint(1,26)
 gen y="block_1" if cluster>0 & cluster<=5
 replace y="block_2" if cluster>5 & cluster<=10
-replace y="block_3" if cluster>10 & cluster<=15
-replace y="block_4" if cluster>15 & cluster<=20
-replace y="block_5" if cluster>20 & cluster<=26
 
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m_each(sdafa))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m_each(1\2\3))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m_each(1))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m_each(1,4\4,9))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m_each(1,4\4,0))
 
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob_each(sdafa))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob_each(1\2\3))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob_each(1))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob_each(.1,.9\0,1.2))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob_each(.1,.8\0,1))
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m_each(sdafa) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m_each(1\2\3) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m_each(1) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m_each(1,4\4,9) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m_each(1,4\4,0) replace)
 
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) m(10))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m(1 1 1 10))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m(13))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m(1 12))
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob_each(sdafa) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob_each(1\2\3) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob_each(1) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob_each(.1,.9\0,1.2) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob_each(.1,.8\0,1) replace)
 
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob(.1 .9 .3))
-expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob(.1))
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) m(10) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m(1 1 1 10) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m(13) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_m(1 12) replace)
+
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob(.1 .9 .3) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob(.1) replace)
+expect_error, run(block_and_cluster_ra, block_var(y) cluster_var(cluster) block_prob_each(.1,.9\0,1) prob(.2) replace)
 
 
 clear all
