@@ -6,8 +6,8 @@
 ****Alex Coppock*********************
 ****Yale University******************
 *************************************
-****05aug2017************************
-*****version 1.7*********************
+****12sep2017************************
+*****version 1.8*********************
 ***john.ternovski@yale.edu***********
 program define complete_ra, rclass byable(recall)
 	version 15
@@ -15,9 +15,9 @@ program define complete_ra, rclass byable(recall)
 
 	
 ///TO DO LIST
-///-add tempnames for all matrices, locals and vars
-///do ado files have a lot of overhead
-///LATER: prob of assignment -- obtain condition probabilities function 
+///-add tempnames for all matrices and locals
+
+
 
 ///TABLE OF CONTENTS
 //////Main Function - LINE 28
@@ -38,6 +38,11 @@ marksample touse
 //get N
 qui count `in' if `touse'==1 `andif'
 local N=`r(N)'
+
+//save original num_arms for error checking 
+if !missing(`"`num_arms'"') {
+	local num_arms_raw=`num_arms'
+}
 
 //get condition number
 if missing(`"`prob'"') & missing(`"`m'"') & missing(`"`prob_each'"') & missing(`"`m_each'"') & missing(`"`num_arms'"') & missing(`"`condition_names'"') {
@@ -81,6 +86,24 @@ if `num_arms'==2 & !missing(`"`withlabel'"') {
 
 //error checking
 if "`skip_check_inputs'"=="" {
+	//take all available commands and see if more than two are specified 
+	local commandlist="m m_each prob prob_each num_arms_raw"
+	local commandnum=0
+	foreach n in `commandlist' {
+		local commandnum=`commandnum'+ !missing(`"``n''"')
+	}
+	if `commandnum'>1 {
+		disp as error "ERROR: You must specify only ONE of the following options: prob, prob_each, block_m, block_m_each, block_prob, num_arms, m"
+		exit 1
+	}
+	//check have enough condition names
+	if !missing(`"`condition_names'"') {
+		if `num_arms'>wordcount(`"`condition_names'"') {
+			disp as error "ERROR: You specified too few condition names"
+			exit 2
+		}
+	}
+	
 	if !missing(`"`prob_each'"'){
 		//probs add up to 1
 		tempname probs
@@ -88,13 +111,8 @@ if "`skip_check_inputs'"=="" {
 		mata : st_local("sum",strofreal(rowsum(st_matrix(st_local("probs")))))
 		if 1!=`sum' {
 			disp as error "ERROR: Percentages in group_percentages must add up to 1"
-			exit
+			exit 3
 		}
-	}
-	//exactly one of {m_each, prob_each} is specified
-	if (!missing(`"`prob_each'"') & !missing(`"`m_each'"')) | (!missing(`"`prob'"') & !missing(`"`m'"')) {
-		disp as error "ERROR: You must specify either m OR prob, but not both"
-		exit
 	}
 	
 	//incomplete assignment
@@ -104,25 +122,25 @@ if "`skip_check_inputs'"=="" {
 		mata : st_local("sum",strofreal(rowsum(st_matrix(st_local("m_each_mat")))))
 		if `N'!=`sum' {
 			disp as error "ERROR: Group numbers in m_eache must add up to the total sample size"
-			exit
+			exit 4
 		}
 	}
 	
-	//insufficient number of condition names for the number of conditions specified	
-	if (!missing(`"`m_each'"') | !missing(`"`num_arms'"')) & !missing(`"`condition_names'"') {
-		local margs=wordcount(`"`m_each'"')
-		local cargs=wordcount(`"`condition_names'"')
-		if `margs'>`cargs' | `num_arms'>`cargs' {
-			disp as error "ERROR: You specified too few condition names"
-			exit 
-		}
-	}
-
 	//m cannot be greater than N
 	if !missing(`"`m'"') {
 		if `m'>`N' {
 			disp as error "ERROR: m must not exceed N."
-			exit
+			exit 5
+		}
+	}
+	
+	//check condition names are unique 
+	if !missing(`"`condition_names'"') {
+		foreach n in `condition_names' {
+			if strpos(`"`condition_names'"',`"`n'"')!=strrpos(`"`condition_names'"',`"`n'"') {
+				disp as error "ERROR: All condition names have to be unique."
+				exit 6
+			}
 		}
 	}
 	*disp "Error checking complete"
