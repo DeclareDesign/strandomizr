@@ -1,5 +1,5 @@
 {smcl}
-{* 26aug2017}{...}
+{* 12sep2017}{...}
 {cmd:help cluster_ra}{right:Version 1.0}
 {hline}
 
