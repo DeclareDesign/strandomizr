@@ -6,8 +6,8 @@
 ****Alex Coppock*********************
 ****Yale University******************
 *************************************
-****26aug2017************************
-*****version 1.0*********************
+****12sep2017************************
+*****version 1.1*********************
 ***john.ternovski@yale.edu***********
 program define cluster_ra, rclass sortpreserve
 	version 15
@@ -38,5 +38,28 @@ complete_ra `assignmenttemp' if `touse'==1, `replace' prob_each(`prob_each') pro
 
 bysort `cluster_var': egen `assignment'=max(`assignmenttemp')
 
+//update condition name labels if applicable
+//programmer's note--unless we want to make label name global/permanent, can't copy local label this many levels up 
+if !missing(`"`condition_names'"') {
+	tempname stringparse
+	local `stringparse'=subinstr(`"`condition_names'"'," ","",.)
+	cap confirm num ``stringparse''
+	if _rc {
+		qui levelsof `assignment', local(start)
+		local start=substr("`start'",1,1)
+		tokenize `"`condition_names'"'
+		label define `assignment' `start' `"`1'"'
+		macro shift
+		local startplusone=`start'+1
+		qui tab `assignment'
+		forval i=`startplusone'/`r(r)' {
+			label define `assignment' `i' `"`1'"', add
+			macro shift
+		}
+		label val `assignment' `assignment'
+	}
+}
+
+return scalar complete=1
 end
 *
