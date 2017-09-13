@@ -6,14 +6,38 @@
 ****Alex Coppock*********************
 ****Yale University******************
 *************************************
-****26aug2017************************
-*****version 1.0*********************
+****12sep2017************************
+*****version 1.1*********************
 ***john.ternovski@yale.edu***********
 program define block_and_cluster_ra, rclass sortpreserve
 	version 15
 	syntax [namelist(max=1 name=assignment)] [if] [in], cluster_var(varname) block_var(varname) [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [block_m(numlist >=0)] [block_m_each(string)] [block_prob(numlist >=0 <=1)] [block_prob_each(string)] [num_arms(numlist max=1 >0)] [condition_names(string)] [m(numlist max=1 >=0 int)] [skip_check_inputs] [replace]
 
-///SHOULD WE ERROR IF CLUSTERS ARE IMPERFECTLY NESTED IN BLOCKS??
+//error-checking 
+if missing(`"`skip_check_inputs'"') {
+	//take all available commands and see if more than two are specified 
+	local commandlist="prob prob_each block_m block_m_each block_prob block_prob_each num_arms m"
+	local commandnum=0
+	foreach n in `commandlist' {
+		local commandnum=`commandnum'+ !missing(`"``n''"')
+	}
+	if `commandnum'>1 {
+		disp as error "ERROR: You must specify only ONE of the following options: prob, prob_each, block_m, block_m_each, block_prob_each, block_prob, num_arms, m"
+		exit 1
+	}
+	
+	//make sure clusters are nested in blocks 
+	tempvar clustnum
+	egen `clustnum'=group(`cluster_var') 
+	qui tab `clustnum'
+	forval i=1/`r(r)' {
+		qui tab `block_var' if `clustnum'==`i'
+		if `r(r)'>1 {
+			disp as error "ERROR: Clusters must be nested within blocks."
+			exit 47
+		}
+	}
+}
 	
 //get number of clusters
 tempvar touse
@@ -60,6 +84,8 @@ if !missing(`"`condition_names'"') {
 		label val `assignment' `assignment'
 	}
 }
+
+return scalar complete=1
 
  
 end
