@@ -1,10 +1,10 @@
-net install randomizr, from(https://raw.githubusercontent.com/DeclareDesign/strandomizr/master/) replace
+*net install randomizr, from(https://raw.githubusercontent.com/DeclareDesign/strandomizr/master/) replace
 *ssc install ralpha 
 
 **Complete Random Assignment Tests
 clear all
 
-//define a few programs
+//define a expect_error program
 program expect_error
 	syntax,run(string)
 	cap `run'
@@ -14,24 +14,7 @@ program expect_error
 	}
 end
 
-program sim_RA, rclass
-	syntax, [run(string)] reps(int)
-	forval i=0/3 {
-		local tr`i'=0
-	}
-	forval i=1/`reps' {
-		qui `run'
-		forval i=0/3 {
-			qui count if assignment==`i'
-			local tr`i'=`tr`i''+`r(N)'
-		}
-	}
-	forval i=0/3 {
-		return scalar tr`i'=`tr`i''
-		disp "tr`i': " `tr`i'' " or " (`tr`i''/(_N*`reps'))*100 "%"
-	}
 
-end
 	
 
 //error testing
@@ -47,6 +30,8 @@ expect_error, run(complete_ra, m(2 1) replace)
 expect_error, run(complete_ra, m(-1) replace)
 expect_error, run(complete_ra, m(1000) replace)
 expect_error, run(complete_ra, m(.1) replace)
+expect_error, run(complete_ra, m(1) m_each(51 50) replace)
+
 
 //prob_each tests
 expect_error, run(complete_ra, prob_each(.2) replace)
@@ -66,6 +51,12 @@ expect_error, run(complete_ra, m_each(10.1 90.9) replace)
 expect_error, run(complete_ra, prob_each(.2 .7) replace) 
 expect_error, run(complete_ra, prob_each(.301 .7) replace) 
 expect_error, run(complete_ra, prob_each(.5 .9 -.4) replace) 
+
+//condition names tests
+expect_error, run(complete_ra, prob_each(.3 .7) replace condition_names(1)) 
+expect_error, run(complete_ra, prob_each(.3 .7) replace condition_names(1 1)) 
+
+
 
 
 //each syntax permutation
@@ -334,7 +325,7 @@ tab treat
 	//bys
 	clear all
 	set obs 101
-	gen y=1 in 1/10
+	gen y=1 in 1/30
 	replace y=2 if y==.
 	bysort y: complete_ra, m(27) 
 	tab assign y, miss
@@ -532,7 +523,7 @@ tab treat
 
 //m_each
 clear all
-set obs 101
+set obs 100
 complete_ra, m_each(25 25 50) 
 tab assign
 complete_ra treat, m_each(25 25 50) 
@@ -550,7 +541,7 @@ tab assign
 complete_ra treat, m_each(25 25 50) replace condition_names(a b c)
 tab treat
 clear all
-set obs 101
+set obs 100
 complete_ra, m_each(25 75) 
 tab assign
 complete_ra treat, m_each(25 75) 
@@ -574,6 +565,25 @@ tab treat
 
 
 //simulations 
+
+program sim_RA, rclass
+	syntax, [run(string)] reps(int)
+	forval i=0/3 {
+		local tr`i'=0
+	}
+	forval i=1/`reps' {
+		qui `run'
+		forval i=0/3 {
+			qui count if assignment==`i'
+			local tr`i'=`tr`i''+`r(N)'
+		}
+	}
+	forval i=0/3 {
+		return scalar tr`i'=`tr`i''
+		disp "tr`i': " `tr`i'' " or " (`tr`i''/(_N*`reps'))*100 "%"
+	}
+
+end
 clear 
 set obs 100
 sim_RA, run(complete_ra, replace) reps(1000)
@@ -590,6 +600,7 @@ sim_RA, run(complete_ra, num_arms(3) replace) reps(10000)
 sim_RA, run(complete_ra, prob_each(.1 .9) replace) reps(10000)
 sim_RA, run(complete_ra, prob_each(.15 .15 .7) replace) reps(10000)
 sim_RA, run(complete_ra, m_each(1 10 2) replace) reps(10000)
+
 clear 
 set obs 1
 sim_RA, run(complete_ra, num_arms(2) replace) reps(10000)
@@ -597,6 +608,8 @@ sim_RA, run(complete_ra, num_arms(3) replace) reps(10000)
 sim_RA, run(complete_ra, prob_each(.1 .2 .7) replace) reps(10000)
 sim_RA, run(complete_ra, prob(.1) replace) reps(10000)
 sim_RA, run(complete_ra, m(1) replace) reps(10000)
+
+
 clear 
 set obs 3
 sim_RA, run(complete_ra, replace) reps(10000)
@@ -606,6 +619,9 @@ sim_RA, run(complete_ra, replace) reps(10000)
 //test labels 
 clear 
 set obs 100
+complete_ra, replace condition_names(a b)
+tab assign
+tab assign, nolab
 complete_ra, prob_each(.1 .9) replace condition_names(a b)
 tab assign
 tab assign, nolab
@@ -639,7 +655,7 @@ clear
 use synth_data_million.dta
 timer clear 1
 timer on 1
-complete_ra, replace
+qui bysort longstring2: complete_ra, replace
 timer off 1 
 timer list 1
 
@@ -654,7 +670,6 @@ timer off 1
 timer list 1
 */
 
-//first generate dummy dataset
 /*
 clear
 set obs 10000000
