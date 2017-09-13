@@ -4,7 +4,6 @@
 **Cluster Random Assignment Tests
 clear all
 
-//define a few programs
 program expect_error
 	syntax,run(string)
 	cap `run'
@@ -14,24 +13,7 @@ program expect_error
 	}
 end
 
-program sim_RA, rclass
-	syntax, [run(string)] reps(int)
-	forval i=0/3 {
-		local tr`i'=0
-	}
-	forval i=1/`reps' {
-		qui `run'
-		forval i=0/3 {
-			qui count if assignment==`i'
-			local tr`i'=`tr`i''+`r(N)'
-		}
-	}
-	forval i=0/3 {
-		return scalar tr`i'=`tr`i''
-		disp "tr`i': " `tr`i'' " or " (`tr`i''/(_N*`reps'))*100 "%"
-	}
 
-end
 	
 
 //error testing
@@ -62,8 +44,11 @@ expect_error, run(cluster_ra, cluster_var(cluster) m_each(30 70), prob_each(.3 .
 expect_error, run(cluster_ra, cluster_var(cluster) m_each(20 20 20) replace)
 expect_error, run(cluster_ra, cluster_var(cluster) m_each(20 20 60) condition_names(1 2) replace)
 expect_error, run(cluster_ra, cluster_var(cluster) m_each(10 10000) condition_names(1 2) replace)
-expect_error, run(cluster_ra, cluster_var(cluster) m_each(101 -1) replace)
-expect_error, run(cluster_ra, cluster_var(cluster) m_each(10.1 90.9) replace)
+expect_error, run(cluster_ra, cluster_var(cluster) m_each(24 -1) replace)
+expect_error, run(cluster_ra, cluster_var(cluster) m_each(1.1 22.9) replace)
+expect_error, run(cluster_ra, cluster_var(cluster) m_each(1 23) condition_names(1 1) replace)
+expect_error, run(cluster_ra, cluster_var(cluster) m_each(1 23) condition_names(1) replace)
+
 
 //prob_each tests
 expect_error, run(cluster_ra, cluster_var(cluster) prob_each(.2 .7) replace) 
@@ -260,13 +245,31 @@ tab treat cluster
 
 
 //simulations 
+program sim_RA, rclass
+	syntax, [run(string)] reps(int)
+	forval i=0/3 {
+		local tr`i'=0
+	}
+	forval i=1/`reps' {
+		qui `run'
+		forval i=0/3 {
+			qui count if assignment==`i'
+			local tr`i'=`tr`i''+`r(N)'
+		}
+	}
+	forval i=0/3 {
+		return scalar tr`i'=`tr`i''
+		disp "tr`i': " `tr`i'' " or " (`tr`i''/(_N*`reps'))*100 "%"
+	}
+
+end
 clear 
 set obs 100
 gen cluster=runiformint(1,26)
 
 sim_RA, run(cluster_ra, cluster_var(cluster) replace) reps(1000)
-sim_RA, run(cluster_ra, cluster_var(cluster) m_each(10 16 0) replace) reps(1000)
-sim_RA, run(cluster_ra, cluster_var(cluster) m_each(26 0 0) replace) reps(1000)
+sim_RA, run(cluster_ra, cluster_var(cluster) m_each(10 14 0) replace) reps(1000)
+sim_RA, run(cluster_ra, cluster_var(cluster) m_each(24 0 0) replace) reps(1000)
 sim_RA, run(cluster_ra, cluster_var(cluster) num_arms(3) replace) reps(10000)
 sim_RA, run(cluster_ra, cluster_var(cluster) prob_each(.1 .9) replace) reps(10000)
 sim_RA, run(cluster_ra, cluster_var(cluster) prob(.1) replace) reps(10000)
@@ -278,7 +281,7 @@ gen cluster=runiformint(1,26)
 sim_RA, run(cluster_ra, cluster_var(cluster)  num_arms(3) replace) reps(10000)
 sim_RA, run(cluster_ra, cluster_var(cluster)  prob_each(.1 .9) replace) reps(10000)
 sim_RA, run(cluster_ra, cluster_var(cluster)  prob_each(.15 .15 .7) replace) reps(10000)
-sim_RA, run(cluster_ra, cluster_var(cluster)  m_each(1 10) replace) reps(10000)
+sim_RA, run(cluster_ra, cluster_var(cluster)  m_each(1 9) replace) reps(10000)
 
 clear 
 set obs 1
@@ -301,6 +304,8 @@ clear
 set obs 100
 gen cluster=runiformint(1,26)
 
+cluster_ra, cluster_var(cluster) replace condition_names(a b c)
+tab assign cluster
 cluster_ra, cluster_var(cluster)  prob_each(.1 .9) replace condition_names(a b)
 tab assign cluster
 tab assign cluster, nolab
