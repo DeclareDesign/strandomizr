@@ -1,12 +1,12 @@
 {smcl}
-{* 27jul2017}{...}
+{* 12sep2017}{...}
 {cmd:help simple_ra}{right:Version 1.4}
 {hline}
 
 {title:Title}
 
 {pstd}
-{hi:cluster_ra} {hline 2} implements a random assignment procedure in which units are independently assigned to treatment conditions.
+{hi:simple_ra} {hline 2} implements a random assignment procedure in which units are independently assigned to treatment conditions.
 {p_end}
 
 {marker syntax}{title:Syntax}
@@ -22,7 +22,7 @@
 
 {marker desc}{title:Description}
 
-{pstd} {cmd:cluster_ra} implements a random assignment procedure in which units are independently assigned to treatment conditions. 
+{pstd} {cmd:simple_ra} implements a random assignment procedure in which units are independently assigned to treatment conditions. 
 Because units are assigned independently, the number of units that are assigned to each condition can vary from assignment to assignment. 
 For most experimental applications in which the number of experimental units is known in advance, complete_ra is better 
 because the number of units assigned to each condition is fixed across assignments.
