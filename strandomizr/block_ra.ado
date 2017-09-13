@@ -6,12 +6,15 @@
 ****Alex Coppock*********************
 ****Yale University******************
 *************************************
-****30aug2017************************
-*****version 1.8*********************
+****11sep2017************************
+*****version 1.9*********************
 ***john.ternovski@yale.edu***********
 program define block_ra, rclass sortpreserve
 	version 15
-	syntax [namelist(max=1 name=assignment)] [if], block_var(varname) [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [block_m(numlist >=0)] [block_m_each(string)] [block_prob(numlist >=0 <=1)] [block_prob_each(string)] [num_arms(numlist max=1 >0)] [condition_names(string)] [m(numlist max=1 >=0 int)] [skip_check_inputs] [replace]
+	syntax [namelist(max=1 name=assignment)] [if], block_var(varname) [prob(numlist max=1 >=0 <=1)] ///
+	[prob_each(numlist >=0 <=1)] [block_m(numlist >=0)] [block_m_each(string)] [block_prob(numlist >=0 <=1)] ///
+	[block_prob_each(string)] [num_arms(numlist max=1 >0)] [condition_names(string)] [m(numlist max=1 >=0 int)] /// 
+	[skip_check_inputs] [replace]
 
 
 //Fixing ifs 
@@ -22,7 +25,7 @@ marksample touse
 
 //get number of blocks   
 tempvar blockint
-egen `blockint'=group(`block_var')
+qui egen `blockint'=group(`block_var')
 qui levelsof `block_var', local(blocklevel) 
 local blockN=wordcount(`"`blocklevel'"')
 
@@ -37,13 +40,17 @@ forval i=1/`blockN' {
 
 //error checking
 if "`skip_check_inputs'"=="" {
-	
-	//exactly one of {block_m_each, block_prob_each} is specified
-	if (!missing(`"`block_prob_each'"') & !missing(`"`block_m_each'"')) | (!missing(`"`prob'"') & !missing(`"`m'"')) {
-		disp as error "ERROR: You must specify either m OR prob, but not both"
-		exit
-	} 
-	/*loop to go through every permutation???*/
+		
+	//take all available commands and see if more than two are specified 
+	local commandlist="prob prob_each block_m block_m_each block_prob_each block_prob num_arms m"
+	local commandnum=0
+	foreach n in `commandlist' {
+		local commandnum=`commandnum'+ !missing(`"``n''"')
+	}
+	if `commandnum'>1 {
+		disp as error "ERROR: You must specify only ONE of the following options: prob, prob_each, block_m, block_m_each, block_prob_each, block_prob, num_arms, m"
+		exit 1
+	}
 	
 	//check matrices are correct 
 	if !missing(`"`block_m_each'"') {
@@ -99,6 +106,7 @@ if "`skip_check_inputs'"=="" {
 		}
 	}
 	
+	//check block commands comport to characteristics of block variable
 	if !missing(`"`block_m'"') {
 		if wordcount(`"`block_m'"')!=`blockN' {
 			disp as error "ERROR: The number of elements in block_m has to equal the number of blocks"
@@ -113,7 +121,6 @@ if "`skip_check_inputs'"=="" {
 		}
 		
 	}
-	
 	if !missing(`"`block_prob'"') {
 		if wordcount(`"`block_prob'"')!=`blockN' {
 			disp as error "ERROR: The number of elements in block_prob has to equal the number of blocks"
@@ -121,18 +128,39 @@ if "`skip_check_inputs'"=="" {
 		}		
 	}
 	
-	//DO WE NEED THIS??? MAYBE WARNING INSTEAD OF ERROR? 
-	//insufficient number of condition names for the number of conditions specified	
-	/*
-	if (!missing(`"`m'"') | !missing(`"`num_arms'"')) & !missing(`"`condition_names'"') {
-		local margs=wordcount(`"`m_each'"')
+	//check condition names comports to other option 
+	if (!missing(`"`m'"') | !missing(`"`prob'"') | !missing(`"`block_m'"') | !missing(`"`block_prob'"')) ///
+	& !missing(`"`condition_names'"') {
 		local cargs=wordcount(`"`condition_names'"')
-		if `margs'>`cargs' | `num_arms'>`cargs' {
+		if 2>`cargs' {
 			disp as error "ERROR: You specified too few condition names"
-			exit 
+			exit 2
 		}
 	}
-	*/
+	if (!missing(`"`prob_each'"')) & !missing(`"`condition_names'"') {
+		local margs=wordcount(`"`prob_each'"')
+		local cargs=wordcount(`"`condition_names'"')
+		if `margs'>`cargs' {
+			disp as error "ERROR: You specified too few condition names"
+			exit 2
+		}
+	}
+	if (!missing(`"`testmatrix'"')) & !missing(`"`condition_names'"') {
+		local margs=colsof(`testmatrix')
+		local cargs=wordcount(`"`condition_names'"')
+		if `margs'>`cargs' {
+			disp as error "ERROR: You specified too few condition names"
+			exit 2
+		}
+	}
+	if !missing(`"`num_arms'"') & !missing(`"`condition_names'"') {
+		local cargs=wordcount(`"`condition_names'"')
+		if `num_arms'>`cargs' {
+			disp as error "ERROR: You specified too few condition names"
+			exit 2
+		}
+	}
+
 	*disp "Error checking complete"
 }
 
@@ -162,7 +190,7 @@ if !missing(`"`condition_names'"') & missing(`"`prob'"') & missing(`"`m'"') & mi
 
 //Case 0 m is specified 
 if !missing(`"`m'"') {
-	bysort `block_var': complete_ra `assignment' `if', `replace' m(`m') skip_check_inputs  condition_names(`condition_names')
+	qui bysort `block_var': complete_ra `assignment' `if', `replace' m(`m') skip_check_inputs  condition_names(`condition_names')
 }
 //Case 1 block_m or block_prob is specified
 if !missing(`"`block_m'"') {
@@ -245,6 +273,7 @@ if !missing(`"`block_prob_each'"') {
 	}
 }
 
+return scalar complete=1
 
 
 end
