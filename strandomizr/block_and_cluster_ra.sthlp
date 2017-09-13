@@ -1,5 +1,5 @@
 {smcl}
-{* 26aug2017}{...}
+{* 12sep2017}{...}
 {cmd:help block_and_cluster_ra}{right:Version 1.0}
 {hline}
 
@@ -30,7 +30,7 @@
 {marker desc}{title:Description}
 
 {pstd} {cmd:block_and_cluster_ra} A random assignment procedure in which units are assigned as clusters and clusters are nested within blocks.
-{marker opt}{title:Options}
+
 
 {marker desc}{title:Options}
 {pstd} {it: treatvar} The name of the treatment variable, you want this command to generate. If left unspecified the resulting variable is called "assignment" by default. {p_end}
