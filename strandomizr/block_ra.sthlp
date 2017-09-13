@@ -1,5 +1,5 @@
 {smcl}
-{* 05aug2017}{...}
+{* 12sep2017}{...}
 {cmd:help block_ra}{right:Version 1.7}
 {hline}
 
