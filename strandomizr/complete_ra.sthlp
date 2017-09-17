@@ -1,6 +1,6 @@
 {smcl}
-{* 12sep2017}{...}
-{cmd:help complete_ra}{right:Version 1.7}
+{* 17sep2017}{...}
+{cmd:help complete_ra}{right:Version 1.8}
 {hline}
 
 {title:Title}
@@ -32,8 +32,8 @@ In a two-arm design, complete_ra will either assign floor(N*prob) or ceiling(N*p
 that the overall probability of assignment is exactly prob.
 In a multi-arm design, complete_ra will first assign floor(N*prob_each) units to their respective conditions, then will assign the remaining 
 units using simple random assignment, choosing these second-stage probabilties so that the overall probabilities of assignment are exactly prob_each.
-In most cases, users should specify N and not more than one of m, m_each, prob, prob_each, or num_arms. 
-If only N is specified, a two-arm trial in which N/2 units are assigned to treatment is assumed. 
+In most cases, users should not more than one of m, m_each, prob, prob_each, or num_arms. 
+If no options are specified, a two-arm trial in which N/2 units are assigned to treatment is assumed. 
 If N is odd, either floor(N/2) units or ceiling(N/2) units will be assigned to treatment.
 
 
