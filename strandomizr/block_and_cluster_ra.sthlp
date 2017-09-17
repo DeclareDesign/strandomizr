@@ -1,6 +1,6 @@
 {smcl}
-{* 12sep2017}{...}
-{cmd:help block_and_cluster_ra}{right:Version 1.0}
+{* 17sep2017}{...}
+{cmd:help block_and_cluster_ra}{right:Version 1.1}
 {hline}
 
 {title:Title}
@@ -35,7 +35,7 @@
 {marker desc}{title:Options}
 {pstd} {it: treatvar} The name of the treatment variable, you want this command to generate. If left unspecified the resulting variable is called "assignment" by default. {p_end}
 
-{pstd} {opt clustervar:(var)} The variable that indicates which cluster each unit belongs to. If left unspecified the resulting variable is called "assignment" by default.{p_end}
+{pstd} {opt clustervar:(var)} The variable that indicates which cluster each unit belongs to. Can be a string or numeric variable.{p_end}
 
 {pstd} {opt block_var:(var)} An existing variable that indicates which block each unit belongs to. Can be a string or numeric variable. {p_end} 
 
@@ -88,7 +88,7 @@ An execption is a two-group design in which num_arms is set to 2, in which case 
 {pstd} {inp:. block_and_cluster_ra, block_var(block) cluster_var(cluster) }{p_end}
 {pstd} {inp:. block_and_cluster_ra, block_var(block) cluster_var(cluster) num_arms(3) replace }{p_end}
 {pstd} {inp:. block_and_cluster_ra, block_var(block) cluster_var(cluster) prob_each(.2 .5 .3) replace }{p_end}
-{pstd} {inp:. matrix define block_m_each=(2, 3\1,4\3,2\2,3\5,1) }{p_end}
+{pstd} {inp:. matrix define block_m_each=(2, 3\1,4\3,2\2,3\4,1) }{p_end}
 {pstd} {inp:. block_and_cluster_ra, block_var(block) cluster_var(cluster) block_m_each(block_m_each) replace }{p_end}
 
 
