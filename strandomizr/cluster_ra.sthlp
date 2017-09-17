@@ -1,6 +1,6 @@
 {smcl}
-{* 12sep2017}{...}
-{cmd:help cluster_ra}{right:Version 1.0}
+{* 17sep2017}{...}
+{cmd:help cluster_ra}{right:Version 1.1}
 {hline}
 
 {title:Title}
@@ -34,7 +34,7 @@ This function conducts complete random assignment at the cluster level.
 {pstd} {it: treatvar} The name of the treatment variable, you want this command to generate. 
 If left unspecified the resulting variable is called "assignment" by default.{p_end}
 
-{pstd} {opt clustervar:(var)} The variable that indicates which cluster each unit belongs to. If left unspecified the resulting variable is called "assignment" by default.{p_end}
+{pstd} {opt clustervar:(var)} The variable that indicates which cluster each unit belongs to. {p_end}
 
 {pstd} {opt m:(num)} Use for a two-arm design in which m clusters are assigned to treatment and N-m clusters are assigned to control.{p_end} 
 {pstd} {opt m_each:(numlist)} Use for a multi-arm design in which the values of m_each determine the number of clusters assigned to each condition.
