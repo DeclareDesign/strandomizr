@@ -1,13 +1,13 @@
 {smcl}
-{* 12sep2017}{...}
-{cmd:help block_ra}{right:Version 1.7}
+{* 17sep2017}{...}
+{cmd:help block_ra}{right:Version 1.8}
 {hline}
 
 {title:Title}
 
 {pstd}
 {hi:block_ra} {hline 2} implements a random assignment procedure in which units that are 
-grouped into blocks defined by pre-treatment covariates are assiged using complete random assignment within block. 
+grouped into blocks defined by pre-treatment covariates are assigned using complete random assignment within block. 
 {p_end}
 
 {marker syntax}{title:Syntax}
@@ -29,7 +29,7 @@ grouped into blocks defined by pre-treatment covariates are assiged using comple
 
 {marker desc}{title:Description}
 
-{pstd} {cmd:block_ra} implements a random assignment procedure in which units that are grouped into blocks defined by pre-treatment covariates are assiged using complete 
+{pstd} {cmd:block_ra} implements a random assignment procedure in which units that are grouped into blocks defined by pre-treatment covariates are assigned using complete 
 random assignment within block. For example, imagine that 50 of 100 men are assigned to treatment and 75 of 200 women are assigned to treatment.
 
 {marker opt}{title:Options}
@@ -79,7 +79,7 @@ An execption is a two-group design in which num_arms is set to 2, in which case 
 
 {pstd} {inp:. set obs 350 }{p_end}
 {pstd} {inp:. gen block="A" in 1/50 }{p_end}
-{pstd} {inp:. replace block="B" in 51/151 }{p_end}
+{pstd} {inp:. replace block="B" in 51/150 }{p_end}
 {pstd} {inp:. replace block="C" if block=="" }{p_end}
 {pstd} {inp:. block_ra, block_var(block) }{p_end}
 {pstd} {inp:. block_ra, block_var(block) prob(.3) replace }{p_end}
