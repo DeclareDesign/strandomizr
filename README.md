@@ -1,8 +1,34 @@
 # strandomizr
-The stata version of randomizr. All necessary files (ado and sthlp) are in the strandomizr directory. To install strandomizr in Stata use the following command: 
+The stata version of randomizr. randomizr is designed to make conducting field, lab, survey, or online experiments easier by automating the random assignment process. To install from SSC just open Stata and type the following in the command line:
+
+``` r
+ssc install strandomizr
+```
+
+Or you can install the most current development release directly from the github:
 
 ``` r
 net install randomizr, from(https://raw.githubusercontent.com/DeclareDesign/strandomizr/master/) replace
 ```
 
 The unit tests folder contains a series of do files that error-check the functions. The vignette directory contains a do file that generates an html using the function markdoc in Stata. The vignette provides a walkthrough for how to use the various random assignment functions in strandomizr.  
+
+There are five main random assignment functions in randomizr: simple_ra, complete_ra, block_ra, cluster_ra, and block_and_cluster_ra, which correspond to common experimental designs.
+
+complete_ra is the workhorse function that will be most appropriate for a large number of experimental situations: it assigns m of N units to treatment:
+
+``` r
+ssc install strandomizr
+set obs 100
+complete_ra, prob_each(.1 .2 .7) condition_names(control placebo treatment)
+```
+
+A more complicated design that, for example, assigns different numbers of clusters to three different treatments can be accomodated like this:
+
+``` r
+set obs 100
+gen cluster=runiformint(1,26) 
+cluster_ra, cluster_var(cluster) m_each(7 7 12) condition_names(control placebo treatment)
+```
+
+Happy randomizing!
