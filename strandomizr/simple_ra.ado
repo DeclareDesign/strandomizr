@@ -6,8 +6,8 @@
 ****Alex Coppock*********************
 ****Yale University******************
 *************************************
-****12sep2017************************
-*****version 1.4********************
+****17sep2017************************
+*****version 1.5********************
 ***john.ternovski@yale.edu***********
 
 program define simple_ra
@@ -74,6 +74,22 @@ if missing(`"`prob'"') & missing(`"`prob_each'"') {
 if !missing(`"`prob_each'"') {
 	local num_arms = wordcount(`"`prob_each'"')
 	local prob_vector `prob_each'
+}
+
+//setting defaults 
+//set default condition names
+if missing(`"`assignment'"') { 
+	local assignment "assignment"
+}
+
+//replace assignment variable and label if replace is specified
+if `"`replace'"'!="" {
+	cap drop `assignment'
+	if _N==0 {
+		qui set obs `N'
+	}
+	cap label drop `assignment'
+
 }
 
 //set up for mata input
