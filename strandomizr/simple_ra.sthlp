@@ -1,6 +1,6 @@
 {smcl}
-{* 12sep2017}{...}
-{cmd:help simple_ra}{right:Version 1.4}
+{* 17sep2017}{...}
+{cmd:help simple_ra}{right:Version 1.5}
 {hline}
 
 {title:Title}
@@ -12,7 +12,7 @@
 {marker syntax}{title:Syntax}
 
 {pstd} 
-{cmd:simple_ra} {it:treatvar} {cmd:, }
+{cmd:simple_ra} [{it:treatvar}] {cmd:, }
 [{opt prob:(num)}
 {opt prob_each:(numlist)}
 {opt num_arms:(num)}
@@ -26,15 +26,13 @@
 Because units are assigned independently, the number of units that are assigned to each condition can vary from assignment to assignment. 
 For most experimental applications in which the number of experimental units is known in advance, complete_ra is better 
 because the number of units assigned to each condition is fixed across assignments.
-In most cases, users should specify N and not more than one of prob, prob_each, or num_arms.
-If only N is specified, a two-arm trial with prob = 0.5 is assumed.
+In most cases, users should specify not more than one of prob, prob_each, or num_arms.
+If no options are specified, a two-arm trial with prob = 0.5 is assumed.
 
 {marker opt}{title:Options}
 
 {pstd} {it: treatvar} The name of the treatment variable, you want this command to generate. 
 If left unspecified the resulting variable is called "assignment" by default.{p_end}
-
-{pstd} {opt clustervar:(var)} The variable that indicates which cluster each unit belongs to. If left unspecified the resulting variable is called "assignment" by default.{p_end}
 
 {pstd} {opt prob:(num)} Use for a two-arm design. prob is the probability of assignment to treatment and must be a real number between 0 and 1 inclusive. {p_end} 
 {pstd} {opt prob_each:(numlist)} Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must 
