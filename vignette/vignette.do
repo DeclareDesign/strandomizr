@@ -1,9 +1,9 @@
 qui log using vignette, replace
 /*** 
- Strandomizer vignette 
+ randomizer vignette 
  =================================== 
  
-strandomizr is a port of the R package randomizr for Stata that simplifies the 
+randomizr is a port of the R package randomizr for Stata that simplifies the 
 design and analysis of randomized experiments. In particular, it makes the 
 random assignment procedure transparent, flexible, and most importantly 
 reproduceable. By the time that many experiments are written up and made public,
