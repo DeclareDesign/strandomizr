@@ -33,4 +33,4 @@ cluster_ra, cluster_var(cluster) m_each(7 7 12) condition_names(control placebo 
 
 Happy randomizing!
 ___
-Authors: John Ternovski and Alex Coppock
+This package was written by John Ternovski and Alex Coppock.
