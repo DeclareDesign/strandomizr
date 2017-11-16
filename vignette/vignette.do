@@ -1,9 +1,9 @@
 qui log using vignette, replace
 /*** 
- randomizer vignette 
- =================================== 
+randomizr vignette 
+=================================== 
  
-randomizr is a port of the R package randomizr for Stata that simplifies the 
+randomizr is a small pacakge for Stata that simplifies the 
 design and analysis of randomized experiments. In particular, it makes the 
 random assignment procedure transparent, flexible, and most importantly 
 reproduceable. By the time that many experiments are written up and made public,
@@ -23,8 +23,8 @@ together. If the analysis ignores the clustering
 in the assignments, estimates of average causal effects and the uncertainty 
 attending to them may be incorrect.
 	
- A Hypothetical Experiment
- -------------------------- 
+A Hypothetical Experiment
+-------------------------- 
 
 Throughout this vignette, we'll pretend we're conducting an experiment among 
 the 592 individuals in R's HairEyeColor 
