@@ -98,7 +98,7 @@
       ------------+-----------------------------------
             Total |        592      100.00</code></pre>
 <p>You can also name your treatment arms.</p>
-<pre><code>      . simple_ra Z, replace prob_each(.2 .2 .6) condition_names(control placebo treatment)
+<pre><code>      . simple_ra Z, replace prob_each(.2 .2 .6) conditions(control placebo treatment)
 
 
       . tab Z
@@ -162,7 +162,7 @@
       ------------+-----------------------------------
             Total |        592      100.00</code></pre>
 <p>You can also name your treatment arms.</p>
-<pre><code>      . complete_ra Z, m_each(100 200 292) replace condition_names(control placebo treatment)
+<pre><code>      . complete_ra Z, m_each(100 200 292) replace conditions(control placebo treatment)
 
 
       . tab Z
@@ -217,8 +217,8 @@
 <p>Block random assignment (sometimes known as stratified random assignment) is a powerful tool when used well. In this design, subjects are sorted into blocks (strata) according to their pre-treatment covariates, and then complete random assignment is conducted within each block. For example, a researcher might block on gender, assigning exactly half of the men and exactly half of the women to treatment.</p>
 <p>Why block? The first reason is to signal to future readers that treatment effect heterogeneity may be of interest: is the treatment effect different for men versus women? Of course, such heterogeneity could be explored if complete random assignment had been used, but blocking on a covariate defends a researcher (somewhat) against claims of data dredging. The second reason is to increase precision. If the blocking variables are predicitive of the outcome (i.e., they are correlated with the outcome), then blocking may help to decrease sampling variability. It's important, however, not to overstate these advantages. The gains from a blocked design can often be realized through covariate adjustment alone.</p>
 <p>Blocking can also produce complications for estimation. Blocking can produce different probabilities of assignment for different subjects. This complication is typically addressed in one of two ways: &quot;controlling for blocks&quot; in a regression context, or inverse probabilitity weights (IPW), in which units are weighted by the inverse of the probability that the unit is in the condition that it is in.</p>
-<p>The only required argument to block_ra is block_var, which is a variable that describes which block a unit belongs to. block_var can be a string or numeric variable. If no other arguments are specified, block_ra assigns an approximately equal proportion of each block to treatment.</p>
-<pre><code>      . block_ra Z, block_var(Hair) replace
+<p>The only required argument to block_ra is blocks, which is a variable that describes which block a unit belongs to. blocks can be a string or numeric variable. If no other arguments are specified, block_ra assigns an approximately equal proportion of each block to treatment.</p>
+<pre><code>      . block_ra Z, blocks(Hair) replace
 
       . tab Z Hair
 
@@ -229,8 +229,8 @@
                1 |        54        143         36         63 |       296 
       -----------+--------------------------------------------+----------
            Total |       108        286         71        127 |       592 </code></pre>
-<p>For multiple treatment arms, use the num_arms argument, with or without the condition_names argument</p>
-<pre><code>      . block_ra Z, block_var(Hair) num_arms(3) replace
+<p>For multiple treatment arms, use the num_arms argument, with or without the conditions argument</p>
+<pre><code>      . block_ra Z, blocks(Hair) num_arms(3) replace
 
       . tab Z Hair
 
@@ -244,7 +244,7 @@
            Total |       108        286         71        127 |       592 
 
 
-      . block_ra Z, block_var(Hair) condition_names(Control Placebo Treatment) replace
+      . block_ra Z, blocks(Hair) conditions(Control Placebo Treatment) replace
 
       . tab Z Hair
 
@@ -257,7 +257,7 @@
       -----------+--------------------------------------------+----------
            Total |       108        286         71        127 |       592 </code></pre>
 <p>block_ra provides a number of ways to adjust the number of subjects assigned to each conditions. The prob_each argument describes what proportion of each block should be assigned to treatment arm. Note of course, that block_ra still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.</p>
-<pre><code>      . block_ra Z, block_var(Hair) prob_each(.3 .7) replace
+<pre><code>      . block_ra Z, blocks(Hair) prob_each(.3 .7) replace
 
       . tab Z Hair
 
@@ -268,7 +268,7 @@
                1 |        33         85         22         39 |       179 
       -----------+--------------------------------------------+----------
            Total |       108        286         71        127 |       592 </code></pre>
-<p>For finer control, use the block_m_each argument, which takes a matrix with as many rows as there are blocks, and as many columns as there are treatment conditions. Remember that the rows are in the same order as seen in tab block_var, a command that is good to run before constructing a block_m_each matrix. The matrix can either be defined using the matrix define command or be inputted directly into the block_m_each option.</p>
+<p>For finer control, use the block_m_each argument, which takes a matrix with as many rows as there are blocks, and as many columns as there are treatment conditions. Remember that the rows are in the same order as seen in tab blocks, a command that is good to run before constructing a block_m_each matrix. The matrix can either be defined using the matrix define command or be inputted directly into the block_m_each option.</p>
 <pre><code>      . tab Hair 
 
              Hair |      Freq.     Percent        Cum.
@@ -291,7 +291,7 @@
       r3   51   20
       r4   87   40
 
-      . block_ra Z, replace block_var(Hair) block_m_each(block_m_each)
+      . block_ra Z, replace blocks(Hair) block_m_each(block_m_each)
 
 
       . tab Z Hair 
@@ -305,7 +305,7 @@
            Total |       108        286         71        127 |       592 
 
 
-      . block_ra Z, replace block_var(Hair) block_m_each(78, 30\186, 100\51, 20\87,40)
+      . block_ra Z, replace blocks(Hair) block_m_each(78, 30\186, 100\51, 20\87,40)
 
 
       . tab Z Hair      
@@ -325,10 +325,10 @@
 <li>Residents in towns or villages: whole communities are assigned to treatment or control</li>
 </ol>
 <p>Clustered assignment decreases the effective sample size of an experiment. In the extreme case when outcomes are perfectly correlated with clusters, the experiment has an effective sample size equal to the number of clusters. When outcomes are perfectly uncorrelated with clusters, the effective sample size is equal to the number of subjects. Almost all cluster-assigned experiments fall somewhere in the middle of these two extremes.</p>
-<p>The only required argument for the cluster_ra function is the clust_var argument, which indicates which cluster each subject belongs to. Let's pretend that for some reason, we have to assign treatments according to the unique combinations of hair color, eye color, and gender.</p>
-<pre><code>      . egen clust_var=group(Hair Eye Sex)
+<p>The only required argument for the cluster_ra function is the clusters argument, which indicates which cluster each subject belongs to. Let's pretend that for some reason, we have to assign treatments according to the unique combinations of hair color, eye color, and gender.</p>
+<pre><code>      . egen clusters=group(Hair Eye Sex)
 
-      . tab clust_var
+      . tab clusters
 
        group(Hair |
          Eye Sex) |      Freq.     Percent        Cum.
@@ -368,9 +368,9 @@
       ------------+-----------------------------------
             Total |        592      100.00
 
-      . cluster_ra Z_clust, cluster_var(clust_var) 
+      . cluster_ra Z_clust, clusters(clusters) 
 
-      . tab clust_var Z_clust
+      . tab clusters Z_clust
 
       group(Hair |        Z_clust
         Eye Sex) |         0          1 |     Total
@@ -411,10 +411,10 @@
            Total |       336        256 |       592 </code></pre>
 <p>This shows that each cluster is either assigned to treatment or control. No two units within the same cluster are assigned to different conditions.</p>
 <p>As with all functions in randomizr, you can specify multiple treatment arms in a variety of ways:</p>
-<pre><code>      . cluster_ra Z_clust, cluster_var(clust_var) num_arms(3) replace
+<pre><code>      . cluster_ra Z_clust, clusters(clusters) num_arms(3) replace
 
 
-      . tab clust_var Z_clust
+      . tab clusters Z_clust
 
       group(Hair |             Z_clust
         Eye Sex) |         1          2          3 |     Total
@@ -453,11 +453,11 @@
               32 |         0          8          0 |         8 
       -----------+---------------------------------+----------
            Total |       248        219        125 |       592 </code></pre>
-<p>...or using condition_names.</p>
-<pre><code>      . cluster_ra Z_clust, cluster_var(clust_var) condition_names(control placebo treatment)  replace
+<p>...or using conditions.</p>
+<pre><code>      . cluster_ra Z_clust, clusters(clusters) conditions(control placebo treatment)  replace
 
 
-      . tab clust_var Z_clust
+      . tab clusters Z_clust
 
       group(Hair |             Z_clust
         Eye Sex) |   control    placebo  treatment |     Total
@@ -497,10 +497,10 @@
       -----------+---------------------------------+----------
            Total |       240        217        135 |       592 </code></pre>
 <p>... or using m_each, which describes how many clusters should be assigned to each condition. m_each must sum to the number of clusters.</p>
-<pre><code>      . cluster_ra Z_clust, cluster_var(clust_var) m_each(5 15 12) replace
+<pre><code>      . cluster_ra Z_clust, clusters(clusters) m_each(5 15 12) replace
 
 
-      . tab clust_var Z_clust
+      . tab clusters Z_clust
 
       group(Hair |             Z_clust
         Eye Sex) |         1          2          3 |     Total
@@ -542,11 +542,11 @@
 <h2 id="block-and-clustered-assignment">Block and Clustered Assignment</h2>
 <p>The power of clustered experiments can sometimes be improved through blocking. In this scenario, whole clusters are members of a particular block -- imagine villages nested within discrete regions, or classrooms nested within discrete schools.</p>
 <p>As an example, let's group our clusters into blocks by size</p>
-<pre><code>      . bysort clust_var: egen cluster_size=count(_n)
+<pre><code>      . bysort clusters: egen cluster_size=count(_n)
 
-      . block_and_cluster_ra Z, block_var(cluster_size) cluster_var(clust_var) replace
+      . block_and_cluster_ra Z, blocks(cluster_size) clusters(clusters) replace
 
-      . tab clust_var Z
+      . tab clusters Z
 
       group(Hair |           Z
         Eye Sex) |         0          1 |     Total

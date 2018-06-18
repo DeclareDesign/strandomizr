@@ -11,7 +11,7 @@
 ***john.ternovski@yale.edu***********
 program define complete_ra, rclass byable(recall)
 	version 15
-	syntax [namelist(max=1 name=assignment)] [if] [in], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [condition_names(string)] [m(numlist max=1 >=0 int)] [m_each(numlist >=0 int)] [skip_check_inputs] [replace]
+	syntax [namelist(max=1 name=assignment)] [if] [in], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [conditions(string)] [m(numlist max=1 >=0 int)] [m_each(numlist >=0 int)] [skip_check_inputs] [replace]
 
 	
 ///TO DO LIST
@@ -45,7 +45,7 @@ if !missing(`"`num_arms'"') {
 }
 
 //get condition number
-if missing(`"`prob'"') & missing(`"`m'"') & missing(`"`prob_each'"') & missing(`"`m_each'"') & missing(`"`num_arms'"') & missing(`"`condition_names'"') {
+if missing(`"`prob'"') & missing(`"`m'"') & missing(`"`prob_each'"') & missing(`"`m_each'"') & missing(`"`num_arms'"') & missing(`"`conditions'"') {
 	local num_arms=2
 }
 if !missing(`"`prob'"') | !missing(`"`m'"') {
@@ -57,17 +57,17 @@ if !missing(`"`prob_each'"') {
 if !missing(`"`m_each'"') {
 	local num_arms=wordcount(`"`m_each'"')
 }
-if !missing(`"`condition_names'"') & missing(`"`num_arms'"') {
-	local num_arms=wordcount(`"`condition_names'"')
+if !missing(`"`conditions'"') & missing(`"`num_arms'"') {
+	local num_arms=wordcount(`"`conditions'"')
 }
 
 //determine if condition names are strings or numbers
 //if strings, then use strings as numbers
 //if numbers, use as treatment values
 
-if !missing(`"`condition_names'"') {
+if !missing(`"`conditions'"') {
 	tempname stringparse
-	local `stringparse'=subinstr(`"`condition_names'"'," ","",.)
+	local `stringparse'=subinstr(`"`conditions'"'," ","",.)
 	cap confirm num ``stringparse''
 	if _rc {
 		local withlabel=1
@@ -97,8 +97,8 @@ if "`skip_check_inputs'"=="" {
 		exit 1
 	}
 	//check have enough condition names
-	if !missing(`"`condition_names'"') {
-		if `num_arms'>wordcount(`"`condition_names'"') {
+	if !missing(`"`conditions'"') {
+		if `num_arms'>wordcount(`"`conditions'"') {
 			disp as error "ERROR: You specified too few condition names"
 			exit 2
 		}
@@ -135,9 +135,9 @@ if "`skip_check_inputs'"=="" {
 	}
 	
 	//check condition names are unique 
-	if !missing(`"`condition_names'"') {
-		foreach n in `condition_names' {
-			if strpos(`"`condition_names'"',`"`n'"')!=strrpos(`"`condition_names'"',`"`n'"') {
+	if !missing(`"`conditions'"') {
+		foreach n in `conditions' {
+			if strpos(`"`conditions'"',`"`n'"')!=strrpos(`"`conditions'"',`"`n'"') {
 				disp as error "ERROR: All condition names have to be unique."
 				exit 6
 			}
@@ -184,13 +184,13 @@ if `num_arms'==2 {
 	if `N'==1 {
 		//neither m nor prob is specified
 		if missing(`"`m'"') & missing(`"`prob'"') {
-			simple_ra `assignmenttemp' `in' if `touse'==1 `andif', prob(.5) condition_names(`"`condition_names'"') `replace'
+			simple_ra `assignmenttemp' `in' if `touse'==1 `andif', prob(.5) conditions(`"`conditions'"') `replace'
 			qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 		}
 		//Special Case 2: N=1; m is specified
 		if `"`m'"'=="0" {
-			if !missing(`"`condition_names'"') & !missing(`"`customnum'"') {
-				local cname1 : word 1 of `condition_names'
+			if !missing(`"`conditions'"') & !missing(`"`customnum'"') {
+				local cname1 : word 1 of `conditions'
 				//fix strings and numbers here
 				replace `assignment'=`cname1' if `touse'==1 `andif' `in'
 			}
@@ -199,13 +199,13 @@ if `num_arms'==2 {
 			}
 		}
 		if `"`m'"'=="1" {
-			simple_ra `assignmenttemp' `in' if `touse'==1 `andif', prob(.5) condition_names(`"`condition_names'"') `replace'
+			simple_ra `assignmenttemp' `in' if `touse'==1 `andif', prob(.5) conditions(`"`conditions'"') `replace'
 			qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 		}
 		
 		//Special Case 3: N=1; prob is specified
 		if !missing(`"`prob'"') {
-			simple_ra `assignmenttemp' `in' if `touse'==1 `andif', prob(`prob') condition_names(`"`condition_names'"') `replace'			
+			simple_ra `assignmenttemp' `in' if `touse'==1 `andif', prob(`prob') conditions(`"`conditions'"') `replace'			
 			qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 		}
 		return scalar complete=1
@@ -221,7 +221,7 @@ if `num_arms'==2 {
 			}
 			else {
 				//random assignment function
-				two_arm_random_assign_func `assignmenttemp' `in' if `touse'==1 `andif', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
+				two_arm_random_assign_func `assignmenttemp' `in' if `touse'==1 `andif', customnum(`"`customnum'"') conditions(`"`conditions'"') m(`m') 
 				qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 				return scalar complete=1
 			}
@@ -245,7 +245,7 @@ if `num_arms'==2 {
 			}
 
 			//random assignment function
-			two_arm_random_assign_func `assignmenttemp' `in' if `touse'==1 `andif', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
+			two_arm_random_assign_func `assignmenttemp' `in' if `touse'==1 `andif', customnum(`"`customnum'"') conditions(`"`conditions'"') m(`m') 
 			qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 			return scalar complete=1
 		}
@@ -274,7 +274,7 @@ if `num_arms'==2 {
 			}
 
 		//random assignment function
-		two_arm_random_assign_func `assignmenttemp' `in' if `touse'==1 `andif', customnum(`"`customnum'"') condition_names(`"`condition_names'"') m(`m') 
+		two_arm_random_assign_func `assignmenttemp' `in' if `touse'==1 `andif', customnum(`"`customnum'"') conditions(`"`conditions'"') m(`m') 
 		qui replace `assignment'=`assignmenttemp' if `touse'==1 `andif'			
 		return scalar complete=1
 		}
@@ -347,20 +347,20 @@ if `num_arms'>2 {
 }
 
 if _bylastcall() {
-	//change values to correspond to custom condition_names values
-	if missing(`"`withlabel'"') & !missing(`"`condition_names'"') {
+	//change values to correspond to custom conditions values
+	if missing(`"`withlabel'"') & !missing(`"`conditions'"') {
 		tempvar assignment_old
 		rename `assignment' `assignment_old'
 		qui gen `assignment'=.
 		forval i=1/`num_arms' {
-			local cname`i' : word `i' of `condition_names'
+			local cname`i' : word `i' of `conditions'
 			qui replace `assignment'=`cname`i'' if `assignment_old'==`i'
 		}
 	}
 
 
 	//label treatment conditions if necessary
-	ra_labeller `assignment', withlabel(`withlabel') condition_names(`"`condition_names'"') index0(`index0') num_arms(`num_arms')
+	ra_labeller `assignment', withlabel(`withlabel') conditions(`"`conditions'"') index0(`index0') num_arms(`num_arms')
 }
 
 end
@@ -368,9 +368,9 @@ end
 
 ///LABELING FUNCTION
 program define ra_labeller
-syntax [namelist(name=assignment)], [withlabel(numlist)] [condition_names(string)] [index0(numlist)] [num_arms(numlist)] 
+syntax [namelist(name=assignment)], [withlabel(numlist)] [conditions(string)] [index0(numlist)] [num_arms(numlist)] 
 if `"`withlabel'"'=="1" {
-	tokenize `"`condition_names'"'
+	tokenize `"`conditions'"'
 	if `"`index0'"'=="1" {
 		local start=0
 	}
@@ -391,14 +391,14 @@ end
 ///TWO ARM RANDOM ASSIGNMENT FUNCTION
 program define two_arm_random_assign_func
 	version 15
-	syntax [namelist(name=assignment)] [if] [in], [customnum(numlist)] [condition_names(string)] [m(numlist)]
+	syntax [namelist(name=assignment)] [if] [in], [customnum(numlist)] [conditions(string)] [m(numlist)]
 
 tempvar rand rank 
 qui gen `rand'=runiform() `if' `in' 
 qui egen `rank'=rank(`rand') `if' `in'
 if !missing(`"`customnum'"') {
-	local cname1=1 /*: word 1 of `condition_names'*/
-	local cname2=2 /*: word 2 of `condition_names'*/
+	local cname1=1 /*: word 1 of `conditions'*/
+	local cname2=2 /*: word 2 of `conditions'*/
 }
 else {
 	local cname1=0

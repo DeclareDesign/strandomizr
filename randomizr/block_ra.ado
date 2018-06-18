@@ -11,9 +11,9 @@
 ***john.ternovski@yale.edu***********
 program define block_ra, rclass sortpreserve
 	version 15
-	syntax [namelist(max=1 name=assignment)] [if], block_var(varname) [prob(numlist max=1 >=0 <=1)] ///
+	syntax [namelist(max=1 name=assignment)] [if], blocks(varname) [prob(numlist max=1 >=0 <=1)] ///
 	[prob_each(numlist >=0 <=1)] [block_m(numlist >=0)] [block_m_each(string)] [block_prob(numlist >=0 <=1)] ///
-	[block_prob_each(string)] [num_arms(numlist max=1 >0)] [condition_names(string)] [m(numlist max=1 >=0 int)] /// 
+	[block_prob_each(string)] [num_arms(numlist max=1 >0)] [conditions(string)] [m(numlist max=1 >=0 int)] /// 
 	[skip_check_inputs] [replace]
 
 
@@ -25,8 +25,8 @@ marksample touse
 
 //get number of blocks   
 tempvar blockint
-qui egen `blockint'=group(`block_var')
-qui levelsof `block_var', local(blocklevel) 
+qui egen `blockint'=group(`blocks')
+qui levelsof `blocks', local(blocklevel) 
 local blockN=wordcount(`"`blocklevel'"')
 
 //get N in each block
@@ -130,31 +130,31 @@ if "`skip_check_inputs'"=="" {
 	
 	//check condition names comports to other option 
 	if (!missing(`"`m'"') | !missing(`"`prob'"') | !missing(`"`block_m'"') | !missing(`"`block_prob'"')) ///
-	& !missing(`"`condition_names'"') {
-		local cargs=wordcount(`"`condition_names'"')
+	& !missing(`"`conditions'"') {
+		local cargs=wordcount(`"`conditions'"')
 		if 2>`cargs' {
 			disp as error "ERROR: You specified too few condition names"
 			exit 2
 		}
 	}
-	if (!missing(`"`prob_each'"')) & !missing(`"`condition_names'"') {
+	if (!missing(`"`prob_each'"')) & !missing(`"`conditions'"') {
 		local margs=wordcount(`"`prob_each'"')
-		local cargs=wordcount(`"`condition_names'"')
+		local cargs=wordcount(`"`conditions'"')
 		if `margs'>`cargs' {
 			disp as error "ERROR: You specified too few condition names"
 			exit 2
 		}
 	}
-	if (!missing(`"`testmatrix'"')) & !missing(`"`condition_names'"') {
+	if (!missing(`"`testmatrix'"')) & !missing(`"`conditions'"') {
 		local margs=colsof(`testmatrix')
-		local cargs=wordcount(`"`condition_names'"')
+		local cargs=wordcount(`"`conditions'"')
 		if `margs'>`cargs' {
 			disp as error "ERROR: You specified too few condition names"
 			exit 2
 		}
 	}
-	if !missing(`"`num_arms'"') & !missing(`"`condition_names'"') {
-		local cargs=wordcount(`"`condition_names'"')
+	if !missing(`"`num_arms'"') & !missing(`"`conditions'"') {
+		local cargs=wordcount(`"`conditions'"')
 		if `num_arms'>`cargs' {
 			disp as error "ERROR: You specified too few condition names"
 			exit 2
@@ -181,16 +181,16 @@ if `"`replace'"'!="" {
 }
 
 //set default if all options missing
-if missing(`"`prob'"') & missing(`"`m'"') & missing(`"`block_prob'"') & missing(`"`block_m'"') & missing(`"`prob_each'"') & missing(`"`block_m_each'"') & missing(`"`block_prob_each'"') &  missing(`"`num_arms'"') & missing(`"`condition_names'"') {
+if missing(`"`prob'"') & missing(`"`m'"') & missing(`"`block_prob'"') & missing(`"`block_m'"') & missing(`"`prob_each'"') & missing(`"`block_m_each'"') & missing(`"`block_prob_each'"') &  missing(`"`num_arms'"') & missing(`"`conditions'"') {
 	local num_arms=2
 }
-if !missing(`"`condition_names'"') & missing(`"`prob'"') & missing(`"`m'"') & missing(`"`block_prob'"') & missing(`"`block_m'"') & missing(`"`prob_each'"') & missing(`"`block_m_each'"') & missing(`"`block_prob_each'"') &  missing(`"`num_arms'"') {
-	local num_arms=wordcount(`"`condition_names'"')
+if !missing(`"`conditions'"') & missing(`"`prob'"') & missing(`"`m'"') & missing(`"`block_prob'"') & missing(`"`block_m'"') & missing(`"`prob_each'"') & missing(`"`block_m_each'"') & missing(`"`block_prob_each'"') &  missing(`"`num_arms'"') {
+	local num_arms=wordcount(`"`conditions'"')
 }
 
 //Case 0 m is specified 
 if !missing(`"`m'"') {
-	qui bysort `block_var': complete_ra `assignment' `if', `replace' m(`m') skip_check_inputs  condition_names(`condition_names')
+	qui bysort `blocks': complete_ra `assignment' `if', `replace' m(`m') skip_check_inputs  conditions(`conditions')
 }
 //Case 1 block_m or block_prob is specified
 if !missing(`"`block_m'"') {
@@ -198,7 +198,7 @@ if !missing(`"`block_m'"') {
 	tempname assignmenttemp
 	forval i=1/`blockN' {
 		local item : word `i' of `block_m'
-		complete_ra `assignmenttemp' if `blockint'==`i' `andif', `replace' m(`item') skip_check_inputs  condition_names(`condition_names')
+		complete_ra `assignmenttemp' if `blockint'==`i' `andif', `replace' m(`item') skip_check_inputs  conditions(`conditions')
 		qui replace `assignment'=`assignmenttemp' if `blockint'==`i' `andif'
 	}
 }
@@ -209,20 +209,20 @@ if !missing(`"`block_prob'"') {
 	tempname assignmenttemp
 	forval i=1/`blockN' {
 		local item : word `i' of `block_prob'
-		complete_ra `assignmenttemp' if `blockint'==`i' `andif', `replace' prob(`item') skip_check_inputs  condition_names(`condition_names')
+		complete_ra `assignmenttemp' if `blockint'==`i' `andif', `replace' prob(`item') skip_check_inputs  conditions(`conditions')
 		qui replace `assignment'=`assignmenttemp' if `blockint'==`i' `andif'
 	}
 }
 
 //Case 2: prob or num_arms or prob_each
 if !missing(`"`prob'"') {
-	qui bysort `block_var': complete_ra `assignment' `if', `replace' prob(`prob')  condition_names(`condition_names')
+	qui bysort `blocks': complete_ra `assignment' `if', `replace' prob(`prob')  conditions(`conditions')
 }
 if !missing(`"`num_arms'"') {
-	qui bysort `block_var': complete_ra `assignment' `if', `replace' num_arms(`num_arms')  condition_names(`condition_names')
+	qui bysort `blocks': complete_ra `assignment' `if', `replace' num_arms(`num_arms')  conditions(`conditions')
 }
 if !missing(`"`prob_each'"') {
-	qui bysort `block_var': complete_ra `assignment' `if', `replace' prob_each(`prob_each')  condition_names(`condition_names')
+	qui bysort `blocks': complete_ra `assignment' `if', `replace' prob_each(`prob_each')  conditions(`conditions')
 }
 
 //Case 3 use block_m_each
@@ -244,7 +244,7 @@ if !missing(`"`block_m_each'"') {
 			local m_each `m_each' `element'
 		}
 		
-		complete_ra `assignmenttemp' if `blockint'==`i' `andif', `replace' m_each(`m_each') skip_check_inputs condition_names(`condition_names')
+		complete_ra `assignmenttemp' if `blockint'==`i' `andif', `replace' m_each(`m_each') skip_check_inputs conditions(`conditions')
 		qui replace `assignment'=`assignmenttemp' if `blockint'==`i' `andif'
 	}
 }
@@ -268,7 +268,7 @@ if !missing(`"`block_prob_each'"') {
 			local prob_each `prob_each' `element'
 		}
 		
-		complete_ra `assignmenttemp' if `blockint'==`i' `andif', `replace' prob_each(`prob_each') skip_check_inputs condition_names(`condition_names')
+		complete_ra `assignmenttemp' if `blockint'==`i' `andif', `replace' prob_each(`prob_each') skip_check_inputs conditions(`conditions')
 		qui replace `assignment'=`assignmenttemp' if `blockint'==`i' `andif'
 	}
 }

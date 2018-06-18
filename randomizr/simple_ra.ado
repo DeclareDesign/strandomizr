@@ -12,14 +12,14 @@
 
 program define simple_ra
 	version 15
-	syntax [namelist(max=1 name=assignment)] [if] [in], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [condition_names(string)] [check_inputs] [replace]
+	syntax [namelist(max=1 name=assignment)] [if] [in], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [conditions(string)] [check_inputs] [replace]
 
 //determine if condition names are strings or numbers
 //if strings, then use strings as numbers
 //if numbers, use as treatment values
-if !missing(`"`condition_names'"') {
+if !missing(`"`conditions'"') {
 	tempname stringparse
-	local `stringparse'=subinstr(`"`condition_names'"'," ","",.)
+	local `stringparse'=subinstr(`"`conditions'"'," ","",.)
 	cap confirm num ``stringparse''
 	if _rc {
 		local withlabel=1
@@ -36,12 +36,12 @@ if !missing(`"`prob'"') {
 if !missing(`"`prob_each'"') {
 	local num_arms=wordcount(`"`prob_each'"')
 }
-if !missing(`"`condition_names'"') & missing(`"`num_arms'"') {
-	local num_arms=wordcount(`"`condition_names'"')
+if !missing(`"`conditions'"') & missing(`"`num_arms'"') {
+	local num_arms=wordcount(`"`conditions'"')
 }
 	
 //set indexing
-if `num_arms'==2 & (!missing(`"`withlabel'"') | missing(`"`condition_names'"')) {
+if `num_arms'==2 & (!missing(`"`withlabel'"') | missing(`"`conditions'"')) {
 	local index0=1
 }
 
@@ -102,13 +102,13 @@ qui putmata `id' `if' `in', replace
 mata: treat = rdiscrete(strtoreal(st_local("N")),1,st_matrix(st_local("p")))
 getmata `assignment'=treat, id(`id') 
 
-//change values to correspond to custom condition_names values
-if missing(`"`withlabel'"') & !missing(`"`condition_names'"') {
+//change values to correspond to custom conditions values
+if missing(`"`withlabel'"') & !missing(`"`conditions'"') {
 	tempvar assignment_old
 	rename `assignment' `assignment_old'
 	qui gen `assignment'=.
 	forval i=1/`num_arms' {
-		local cname`i' : word `i' of `condition_names'
+		local cname`i' : word `i' of `conditions'
 		qui replace `assignment'=`cname`i'' if `assignment_old'==`i'
 	}
 }
@@ -121,7 +121,7 @@ if `"`index0'"'=="1" {
 
 //label treatment conditions if necessary
 if `"`withlabel'"'=="1" {
-	tokenize `"`condition_names'"'
+	tokenize `"`conditions'"'
 	if `"`index0'"'=="1" {
 		local start=0
 	}

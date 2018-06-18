@@ -18,7 +18,7 @@
 {opt prob:(num)}
 {opt prob_each:(numlist)}
 {opt num_arms:(num)}
-{opt condition_names:(string)}
+{opt conditions:(string)}
 {opt replace}
 {opt skip_check_inputs}]
 
@@ -53,7 +53,7 @@ prob_each must be a list of numbers giving the probability of assignment to each
 All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, 
 the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each.{p_end} 
 {pstd} {opt num_arms:(num)} The number of treatment arms. If unspecified, num_arms will be determined from the other arguments.{p_end} 
-{pstd} {opt condition_names:(string)} A string list giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) 
+{pstd} {opt conditions:(string)} A string list giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) 
 in a two-arm trial and 1, 2, 3, in a multi-arm trial. 
 An execption is a two-group design in which num_arms is set to 2, in which case the condition names are 1 and 2, as in a multi-arm trial with two arms.{p_end} 
 {pstd} {opt replace} If treatvar exists in dataset, the command replaces it.{p_end}
@@ -66,11 +66,11 @@ An execption is a two-group design in which num_arms is set to 2, in which case 
 {pstd} {inp:. complete_ra }{p_end}
 {pstd} {inp:. complete_ra, m(50) replace }{p_end}
 {pstd} {inp:. complete_ra, prob(.111) replace }{p_end}
-{pstd} {inp:. complete_ra, condition_names(control treatment) replace }{p_end}
+{pstd} {inp:. complete_ra, conditions(control treatment) replace }{p_end}
 {pstd} {inp:. complete_ra, num_arms(3) replace }{p_end}
 {pstd} {inp:. complete_ra, m_each(30 30 40) replace }{p_end}
 {pstd} {inp:. complete_ra, prob_each(.1 .2 .7) replace }{p_end}
-{pstd} {inp:. complete_ra, condition_names(control placebo treatment) replace }{p_end}
+{pstd} {inp:. complete_ra, conditions(control placebo treatment) replace }{p_end}
 
 
 {title:Authors}

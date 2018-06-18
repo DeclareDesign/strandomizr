@@ -20,7 +20,7 @@ complete_ra is the workhorse function that will be most appropriate for a large 
 ``` r
 ssc install randomizr
 set obs 100
-complete_ra, prob_each(.1 .2 .7) condition_names(control placebo treatment)
+complete_ra, prob_each(.1 .2 .7) conditions(control placebo treatment)
 ```
 
 A more complicated design that, for example, assigns different numbers of clusters to three different treatments can be accomodated like this:
@@ -28,7 +28,7 @@ A more complicated design that, for example, assigns different numbers of cluste
 ``` r
 set obs 100
 gen cluster=runiformint(1,26) 
-cluster_ra, cluster_var(cluster) m_each(7 7 12) condition_names(control placebo treatment)
+cluster_ra, clusters(cluster) m_each(7 7 12) conditions(control placebo treatment)
 ```
 
 Happy randomizing!

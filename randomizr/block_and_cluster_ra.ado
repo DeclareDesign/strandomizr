@@ -11,7 +11,7 @@
 ***john.ternovski@yale.edu***********
 program define block_and_cluster_ra, rclass sortpreserve
 	version 15
-	syntax [namelist(max=1 name=assignment)] [if] [in], cluster_var(varname) block_var(varname) [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [block_m(numlist >=0)] [block_m_each(string)] [block_prob(numlist >=0 <=1)] [block_prob_each(string)] [num_arms(numlist max=1 >0)] [condition_names(string)] [m(numlist max=1 >=0 int)] [skip_check_inputs] [replace]
+	syntax [namelist(max=1 name=assignment)] [if] [in], clusters(varname) blocks(varname) [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [block_m(numlist >=0)] [block_m_each(string)] [block_prob(numlist >=0 <=1)] [block_prob_each(string)] [num_arms(numlist max=1 >0)] [conditions(string)] [m(numlist max=1 >=0 int)] [skip_check_inputs] [replace]
 
 //error-checking 
 if missing(`"`skip_check_inputs'"') {
@@ -28,10 +28,10 @@ if missing(`"`skip_check_inputs'"') {
 	
 	//make sure clusters are nested in blocks 
 	tempvar clustnum
-	egen `clustnum'=group(`cluster_var') 
+	egen `clustnum'=group(`clusters') 
 	qui tab `clustnum'
 	forval i=1/`r(r)' {
-		qui tab `block_var' if `clustnum'==`i'
+		qui tab `blocks' if `clustnum'==`i'
 		if `r(r)'>1 {
 			disp as error "ERROR: Clusters must be nested within blocks."
 			exit 47
@@ -41,7 +41,7 @@ if missing(`"`skip_check_inputs'"') {
 	
 //get number of clusters
 tempvar touse
-egen `touse'=tag(`cluster_var' `block_var') `if' `in'
+egen `touse'=tag(`clusters' `blocks') `if' `in'
 
 //setting defaults 
 //set default condition names
@@ -60,19 +60,19 @@ if `"`replace'"'!="" {
 }
 
 tempvar assignmenttemp
-block_ra `assignmenttemp' if `touse'==1 `andif' `in', `replace' block_var(`block_var') prob_each(`prob_each') prob(`prob') block_m(`block_m') block_m_each(`block_m_each') block_prob(`block_prob') block_prob_each(`block_prob_each') num_arms(`num_arms') condition_names(`condition_names') m(`m') `skip_check_inputs'
-bysort `cluster_var': egen `assignment'=max(`assignmenttemp')
+block_ra `assignmenttemp' if `touse'==1 `andif' `in', `replace' blocks(`blocks') prob_each(`prob_each') prob(`prob') block_m(`block_m') block_m_each(`block_m_each') block_prob(`block_prob') block_prob_each(`block_prob_each') num_arms(`num_arms') conditions(`conditions') m(`m') `skip_check_inputs'
+bysort `clusters': egen `assignment'=max(`assignmenttemp')
 
 //update condition name labels if applicable
 //programmer's note--unless we want to make label name global/permanent, can't copy local label this many levels up 
-if !missing(`"`condition_names'"') {
+if !missing(`"`conditions'"') {
 	tempname stringparse
-	local `stringparse'=subinstr(`"`condition_names'"'," ","",.)
+	local `stringparse'=subinstr(`"`conditions'"'," ","",.)
 	cap confirm num ``stringparse''
 	if _rc {
 		qui levelsof `assignment', local(start)
 		local start=substr("`start'",1,1)
-		tokenize `"`condition_names'"'
+		tokenize `"`conditions'"'
 		label define `assignment' `start' `"`1'"'
 		macro shift
 		local startplusone=`start'+1

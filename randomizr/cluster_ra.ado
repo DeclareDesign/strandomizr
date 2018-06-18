@@ -11,11 +11,11 @@
 ***john.ternovski@yale.edu***********
 program define cluster_ra, rclass sortpreserve
 	version 15
-	syntax [namelist(max=1 name=assignment)], cluster_var(varname) [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [condition_names(string)] [m(numlist max=1 >=0 int)] [m_each(numlist >=0 int)] [skip_check_inputs] [replace]
+	syntax [namelist(max=1 name=assignment)], clusters(varname) [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [conditions(string)] [m(numlist max=1 >=0 int)] [m_each(numlist >=0 int)] [skip_check_inputs] [replace]
 
 //get number of clusters
 tempvar touse
-egen `touse'=tag(`cluster_var')
+egen `touse'=tag(`clusters')
 
 //setting defaults 
 //set default condition names
@@ -34,20 +34,20 @@ if `"`replace'"'!="" {
 }
 
 tempvar assignmenttemp
-complete_ra `assignmenttemp' if `touse'==1, `replace' prob_each(`prob_each') prob(`prob') num_arms(`num_arms') condition_names(`condition_names') m(`m') m_each(`m_each') `skip_check_inputs'
+complete_ra `assignmenttemp' if `touse'==1, `replace' prob_each(`prob_each') prob(`prob') num_arms(`num_arms') conditions(`conditions') m(`m') m_each(`m_each') `skip_check_inputs'
 
-bysort `cluster_var': egen `assignment'=max(`assignmenttemp')
+bysort `clusters': egen `assignment'=max(`assignmenttemp')
 
 //update condition name labels if applicable
 //programmer's note--unless we want to make label name global/permanent, can't copy local label this many levels up 
-if !missing(`"`condition_names'"') {
+if !missing(`"`conditions'"') {
 	tempname stringparse
-	local `stringparse'=subinstr(`"`condition_names'"'," ","",.)
+	local `stringparse'=subinstr(`"`conditions'"'," ","",.)
 	cap confirm num ``stringparse''
 	if _rc {
 		qui levelsof `assignment', local(start)
 		local start=substr("`start'",1,1)
-		tokenize `"`condition_names'"'
+		tokenize `"`conditions'"'
 		label define `assignment' `start' `"`1'"'
 		macro shift
 		local startplusone=`start'+1

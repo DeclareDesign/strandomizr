@@ -16,7 +16,7 @@
 [{opt prob:(num)}
 {opt prob_each:(numlist)}
 {opt num_arms:(num)}
-{opt condition_names:(string)}
+{opt conditions:(string)}
 {opt replace}
 {opt skip_check_inputs}]
 
@@ -38,7 +38,7 @@ If left unspecified the resulting variable is called "assignment" by default.{p_
 {pstd} {opt prob_each:(numlist)} Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must 
 be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1.{p_end} 
 {pstd} {opt num_arms:(num)} The number of treatment arms. If unspecified, num_arms will be determined from the other arguments.{p_end} 
-{pstd} {opt condition_names:(string)} A string list giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) 
+{pstd} {opt conditions:(string)} A string list giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) 
 in a two-arm trial and 1, 2, 3, in a multi-arm trial. 
 An execption is a two-group design in which num_arms is set to 2, in which case the condition names are 1 and 2, as in a multi-arm trial with two arms.{p_end} 
 {pstd} {opt replace} If treatvar exists in dataset, the command replaces it.{p_end}
@@ -49,9 +49,9 @@ An execption is a two-group design in which num_arms is set to 2, in which case 
 
 {pstd} {inp:. simple_ra treat }{p_end}
 {pstd} {inp:. simple_ra treat, replace prob(.5) }{p_end}
-{pstd} {inp:. simple_ra treat, replace prob_each(.3 .7) condition_names(control treatment) }{p_end}
+{pstd} {inp:. simple_ra treat, replace prob_each(.3 .7) conditions(control treatment) }{p_end}
 {pstd} {inp:. simple_ra treat, replace num_arms(3) }{p_end}
-{pstd} {inp:. simple_ra treat, replace prob_each(.3 .3 .4) condition_names(control treatment placebo) }{p_end}
+{pstd} {inp:. simple_ra treat, replace prob_each(.3 .3 .4) conditions(control treatment placebo) }{p_end}
 
 
 {title:Authors}

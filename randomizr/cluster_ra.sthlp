@@ -14,13 +14,13 @@ This function conducts complete random assignment at the cluster level.
 
 {pstd} 
 {cmd:cluster_ra} [{it:treatvar}] {cmd:, }
-{opt cluster_var:(var)}
+{opt clusters:(var)}
 [{opt m:(num)}
 {opt m_each:(numlist)}
 {opt prob:(num)}
 {opt prob_each:(numlist)}
 {opt num_arms:(num)}
-{opt condition_names:(string)}
+{opt conditions:(string)}
 {opt replace}
 {opt skip_check_inputs}]
 
@@ -49,7 +49,7 @@ treatment condition. prob_each must be a numeric list giving the probability of 
 numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of clusters assigned 
 to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each.{p_end} 
 {pstd} {opt num_arms:(num)} The number of treatment arms. If unspecified, num_arms will be determined from the other arguments.{p_end} 
-{pstd} {opt condition_names:(string)} A string list giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) 
+{pstd} {opt conditions:(string)} A string list giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) 
 in a two-arm trial and 1, 2, 3, in a multi-arm trial. 
 An execption is a two-group design in which num_arms is set to 2, in which case the condition names are 1 and 2, as in a multi-arm trial with two arms.{p_end} 
 {pstd} {opt replace} If treatvar exists in dataset, the command replaces it.{p_end}
@@ -60,13 +60,13 @@ An execption is a two-group design in which num_arms is set to 2, in which case 
 
 {pstd} {inp:. set obs 100 }{p_end}
 {pstd} {inp:. gen cluster=runiformint(1,26) }{p_end}
-{pstd} {inp:. cluster_ra, cluster_var(cluster) }{p_end}
-{pstd} {inp:. cluster_ra, cluster_var(cluster) m(13) replace }{p_end}
-{pstd} {inp:. cluster_ra, cluster_var(cluster) m_each(10 16) condition_names(control treatment) replace }{p_end}
-{pstd} {inp:. cluster_ra, cluster_var(cluster) num_arms(3) replace }{p_end}
-{pstd} {inp:. cluster_ra, cluster_var(cluster) m_each(7 7 12) replace }{p_end}
-{pstd} {inp:. cluster_ra, cluster_var(cluster) m_each(7 7 12) condition_names(control placebo treatment) replace }{p_end}
-{pstd} {inp:. cluster_ra, cluster_var(cluster) condition_names(control placebo treatment) replace }{p_end}
+{pstd} {inp:. cluster_ra, clusters(cluster) }{p_end}
+{pstd} {inp:. cluster_ra, clusters(cluster) m(13) replace }{p_end}
+{pstd} {inp:. cluster_ra, clusters(cluster) m_each(10 16) conditions(control treatment) replace }{p_end}
+{pstd} {inp:. cluster_ra, clusters(cluster) num_arms(3) replace }{p_end}
+{pstd} {inp:. cluster_ra, clusters(cluster) m_each(7 7 12) replace }{p_end}
+{pstd} {inp:. cluster_ra, clusters(cluster) m_each(7 7 12) conditions(control placebo treatment) replace }{p_end}
+{pstd} {inp:. cluster_ra, clusters(cluster) conditions(control placebo treatment) replace }{p_end}
 
 
 {title:Authors}

@@ -42,8 +42,8 @@ expect_error, run(complete_ra, prob_each(1 2) replace)
 //m_each tests
 expect_error, run(complete_ra, m_each(30 70), prob_each(.3 .7) replace)
 expect_error, run(complete_ra, m_each(20 20 20) replace)
-expect_error, run(complete_ra, m_each(20 20 60) condition_names(1 2) replace)
-expect_error, run(complete_ra, m_each(10 10000) condition_names(1 2) replace)
+expect_error, run(complete_ra, m_each(20 20 60) conditions(1 2) replace)
+expect_error, run(complete_ra, m_each(10 10000) conditions(1 2) replace)
 expect_error, run(complete_ra, m_each(101 -1) replace)
 expect_error, run(complete_ra, m_each(10.1 90.9) replace)
 
@@ -53,8 +53,8 @@ expect_error, run(complete_ra, prob_each(.301 .7) replace)
 expect_error, run(complete_ra, prob_each(.5 .9 -.4) replace) 
 
 //condition names tests
-expect_error, run(complete_ra, prob_each(.3 .7) replace condition_names(1)) 
-expect_error, run(complete_ra, prob_each(.3 .7) replace condition_names(1 1)) 
+expect_error, run(complete_ra, prob_each(.3 .7) replace conditions(1)) 
+expect_error, run(complete_ra, prob_each(.3 .7) replace conditions(1 1)) 
 
 
 
@@ -71,13 +71,13 @@ complete_ra treat
 tab treat
 complete_ra treat, replace
 tab treat
-complete_ra, replace condition_names(21 22)
+complete_ra, replace conditions(21 22)
 tab assign
-complete_ra treat, replace condition_names(21 22)
+complete_ra treat, replace conditions(21 22)
 tab treat
-complete_ra, replace condition_names(a b)
+complete_ra, replace conditions(a b)
 tab assign
-complete_ra treat, replace condition_names(a b)
+complete_ra treat, replace conditions(a b)
 tab treat
 
 	//with ifs
@@ -92,13 +92,13 @@ tab treat
 	tab treat y, miss
 	complete_ra treat if y==1, replace
 	tab treat y, miss
-	complete_ra if y==1, replace condition_names(21 22)
+	complete_ra if y==1, replace conditions(21 22)
 	tab assign y, miss
-	complete_ra treat if y==1, replace condition_names(21 22)
+	complete_ra treat if y==1, replace conditions(21 22)
 	tab treat y, miss
-	complete_ra if y==1, replace condition_names(a b)
+	complete_ra if y==1, replace conditions(a b)
 	tab assign y, miss
-	complete_ra treat if y==1, replace condition_names(a b)
+	complete_ra treat if y==1, replace conditions(a b)
 	tab treat y, miss
 
 	//with ins
@@ -113,13 +113,13 @@ tab treat
 	tab treat y, miss
 	complete_ra treat in 10/80, replace
 	tab treat y, miss
-	complete_ra in 10/80, replace condition_names(21 22)
+	complete_ra in 10/80, replace conditions(21 22)
 	tab assign y, miss
-	complete_ra treat in 10/80, replace condition_names(21 22)
+	complete_ra treat in 10/80, replace conditions(21 22)
 	tab treat y, miss
-	complete_ra in 10/80, replace condition_names(a b)
+	complete_ra in 10/80, replace conditions(a b)
 	tab assign y, miss
-	complete_ra treat in 10/80, replace condition_names(a b)
+	complete_ra treat in 10/80, replace conditions(a b)
 	tab treat y, miss
 
 	//with by
@@ -135,13 +135,13 @@ tab treat
 	tab treat y, miss
 	bysort y: complete_ra treat, replace
 	tab treat y, miss
-	bysort y: complete_ra, replace condition_names(21 22)
+	bysort y: complete_ra, replace conditions(21 22)
 	tab assign y, miss
-	bysort y: complete_ra treat, replace condition_names(21 22)
+	bysort y: complete_ra treat, replace conditions(21 22)
 	tab treat y, miss
-	bysort y: complete_ra, replace condition_names(a b)
+	bysort y: complete_ra, replace conditions(a b)
 	tab assign y, miss
-	bysort y: complete_ra treat, replace condition_names(a b)
+	bysort y: complete_ra treat, replace conditions(a b)
 	tab treat y, miss
 	
 
@@ -156,21 +156,21 @@ complete_ra, num_arms(3) replace
 tab assign
 complete_ra treat, num_arms(3) replace
 tab treat
-complete_ra, num_arms(2) replace condition_names(21 22)
+complete_ra, num_arms(2) replace conditions(21 22)
 tab assign
-complete_ra treat, num_arms(2) replace condition_names(21 22)
+complete_ra treat, num_arms(2) replace conditions(21 22)
 tab treat
-complete_ra, num_arms(3) replace condition_names(21 22 23) 
+complete_ra, num_arms(3) replace conditions(21 22 23) 
 tab assign
-complete_ra treat, num_arms(3) replace condition_names(21 22 23) 
+complete_ra treat, num_arms(3) replace conditions(21 22 23) 
 tab treat
-complete_ra, num_arms(2) replace condition_names(a b)
+complete_ra, num_arms(2) replace conditions(a b)
 tab assign
-complete_ra treat, num_arms(2) replace condition_names(a b)
+complete_ra treat, num_arms(2) replace conditions(a b)
 tab treat
-complete_ra, num_arms(3) replace condition_names(a b c)
+complete_ra, num_arms(3) replace conditions(a b c)
 tab assign
-complete_ra treat, num_arms(3) replace condition_names(a b c)
+complete_ra treat, num_arms(3) replace conditions(a b c)
 tab treat
 
 	//ifs
@@ -185,21 +185,21 @@ tab treat
 	tab assign
 	complete_ra treat if y==1 , num_arms(3) replace
 	tab treat
-	complete_ra if y==1, num_arms(2) replace condition_names(21 22)
+	complete_ra if y==1, num_arms(2) replace conditions(21 22)
 	tab assign
-	complete_ra treat if y==1 , num_arms(2) replace condition_names(21 22)
+	complete_ra treat if y==1 , num_arms(2) replace conditions(21 22)
 	tab treat
-	complete_ra if y==1, num_arms(3) replace condition_names(21 22 23) 
+	complete_ra if y==1, num_arms(3) replace conditions(21 22 23) 
 	tab assign
-	complete_ra treat if y==1 , num_arms(3) replace condition_names(21 22 23) 
+	complete_ra treat if y==1 , num_arms(3) replace conditions(21 22 23) 
 	tab treat
-	complete_ra if y==1, num_arms(2) replace condition_names(a b)
+	complete_ra if y==1, num_arms(2) replace conditions(a b)
 	tab assign
-	complete_ra treat if y==1 , num_arms(2) replace condition_names(a b)
+	complete_ra treat if y==1 , num_arms(2) replace conditions(a b)
 	tab treat
-	complete_ra if y==1, num_arms(3) replace condition_names(a b c)
+	complete_ra if y==1, num_arms(3) replace conditions(a b c)
 	tab assign
-	complete_ra treat if y==1 , num_arms(3) replace condition_names(a b c)
+	complete_ra treat if y==1 , num_arms(3) replace conditions(a b c)
 	tab treat
 
 	//ins
@@ -214,21 +214,21 @@ tab treat
 	tab assign
 	complete_ra treat in 20/80, num_arms(3) replace
 	tab treat
-	complete_ra in 20/80, num_arms(2) replace condition_names(21 22)
+	complete_ra in 20/80, num_arms(2) replace conditions(21 22)
 	tab assign
-	complete_ra treat in 20/80 , num_arms(2) replace condition_names(21 22)
+	complete_ra treat in 20/80 , num_arms(2) replace conditions(21 22)
 	tab treat
-	complete_ra in 20/80, num_arms(3) replace condition_names(21 22 23) 
+	complete_ra in 20/80, num_arms(3) replace conditions(21 22 23) 
 	tab assign
-	complete_ra treat in 20/80 , num_arms(3) replace condition_names(21 22 23) 
+	complete_ra treat in 20/80 , num_arms(3) replace conditions(21 22 23) 
 	tab treat
-	complete_ra in 20/80, num_arms(2) replace condition_names(a b)
+	complete_ra in 20/80, num_arms(2) replace conditions(a b)
 	tab assign
-	complete_ra treat in 20/80 , num_arms(2) replace condition_names(a b)
+	complete_ra treat in 20/80 , num_arms(2) replace conditions(a b)
 	tab treat
-	complete_ra in 20/80, num_arms(3) replace condition_names(a b c)
+	complete_ra in 20/80, num_arms(3) replace conditions(a b c)
 	tab assign
-	complete_ra treat in 20/80 , num_arms(3) replace condition_names(a b c)
+	complete_ra treat in 20/80 , num_arms(3) replace conditions(a b c)
 	tab treat
 	
 	//bys
@@ -244,21 +244,21 @@ tab treat
 	tab assign y, miss
 	bysort y: complete_ra treat, num_arms(3) replace
 	tab treat y, miss
-	bysort y: complete_ra, num_arms(2) replace condition_names(21 22)
+	bysort y: complete_ra, num_arms(2) replace conditions(21 22)
 	tab assign y, miss
-	bysort y: complete_ra treat, num_arms(2) replace condition_names(21 22)
+	bysort y: complete_ra treat, num_arms(2) replace conditions(21 22)
 	tab treat y, miss
-	bysort y: complete_ra, num_arms(3) replace condition_names(21 22 23) 
+	bysort y: complete_ra, num_arms(3) replace conditions(21 22 23) 
 	tab assign y, miss
-	bysort y: complete_ra treat, num_arms(3) replace condition_names(21 22 23) 
+	bysort y: complete_ra treat, num_arms(3) replace conditions(21 22 23) 
 	tab treat y, miss
-	bysort y: complete_ra, num_arms(2) replace condition_names(a b)
+	bysort y: complete_ra, num_arms(2) replace conditions(a b)
 	tab assign y, miss
-	bysort y: complete_ra treat, num_arms(2) replace condition_names(a b)
+	bysort y: complete_ra treat, num_arms(2) replace conditions(a b)
 	tab treat y, miss
-	bysort y: complete_ra, num_arms(3) replace condition_names(a b c)
+	bysort y: complete_ra, num_arms(3) replace conditions(a b c)
 	tab assign y, miss
-	bysort y: complete_ra treat, num_arms(3) replace condition_names(a b c)
+	bysort y: complete_ra treat, num_arms(3) replace conditions(a b c)
 	tab treat y, miss
 	
 
@@ -274,13 +274,13 @@ complete_ra, m(27) replace
 tab assign
 complete_ra treat, m(27) replace
 tab treat
-complete_ra, m(27) replace condition_names(21 22)
+complete_ra, m(27) replace conditions(21 22)
 tab assign
-complete_ra treat, m(27) replace condition_names(21 22)
+complete_ra treat, m(27) replace conditions(21 22)
 tab treat
-complete_ra, m(27) replace condition_names(a b)
+complete_ra, m(27) replace conditions(a b)
 tab assign
-complete_ra treat, m(27) replace condition_names(a b)
+complete_ra treat, m(27) replace conditions(a b)
 tab treat
 	//ifs
 	clear all
@@ -294,13 +294,13 @@ tab treat
 	tab assign
 	complete_ra treat if y==1, m(27) replace
 	tab treat
-	complete_ra if y==1, m(27) replace condition_names(21 22)
+	complete_ra if y==1, m(27) replace conditions(21 22)
 	tab assign
-	complete_ra treat if y==1, m(27) replace condition_names(21 22)
+	complete_ra treat if y==1, m(27) replace conditions(21 22)
 	tab treat
-	complete_ra if y==1, m(27) replace condition_names(a b)
+	complete_ra if y==1, m(27) replace conditions(a b)
 	tab assign
-	complete_ra treat if y==1, m(27) replace condition_names(a b)
+	complete_ra treat if y==1, m(27) replace conditions(a b)
 	tab treat
 	//ins
 	clear all
@@ -314,13 +314,13 @@ tab treat
 	tab assign
 	complete_ra treat in 20/80, m(27) replace
 	tab treat
-	complete_ra in 20/80, m(27) replace condition_names(21 22)
+	complete_ra in 20/80, m(27) replace conditions(21 22)
 	tab assign
-	complete_ra treat in 20/80, m(27) replace condition_names(21 22)
+	complete_ra treat in 20/80, m(27) replace conditions(21 22)
 	tab treat
-	complete_ra in 20/80, m(27) replace condition_names(a b)
+	complete_ra in 20/80, m(27) replace conditions(a b)
 	tab assign
-	complete_ra treat in 20/80, m(27) replace condition_names(a b)
+	complete_ra treat in 20/80, m(27) replace conditions(a b)
 	tab treat
 	//bys
 	clear all
@@ -335,13 +335,13 @@ tab treat
 	tab assign y, miss
 	bysort y: complete_ra treat, m(27) replace
 	tab treat y, miss
-	bysort y: complete_ra, m(27) replace condition_names(21 22)
+	bysort y: complete_ra, m(27) replace conditions(21 22)
 	tab assign y, miss
-	bysort y: complete_ra treat, m(27) replace condition_names(21 22)
+	bysort y: complete_ra treat, m(27) replace conditions(21 22)
 	tab treat y, miss
-	bysort y: complete_ra, m(27) replace condition_names(a b)
+	bysort y: complete_ra, m(27) replace conditions(a b)
 	tab assign y, miss
-	bysort y: complete_ra treat, m(27) replace condition_names(a b)
+	bysort y: complete_ra treat, m(27) replace conditions(a b)
 	tab treat y, miss
 	
 
@@ -356,13 +356,13 @@ complete_ra, prob(.33333333) replace
 tab assign
 complete_ra treat, prob(.33333333) replace
 tab treat
-complete_ra, prob(.33333333) replace condition_names(21 22)
+complete_ra, prob(.33333333) replace conditions(21 22)
 tab assign
-complete_ra treat, prob(.33333333) replace condition_names(21 22)
+complete_ra treat, prob(.33333333) replace conditions(21 22)
 tab treat
-complete_ra, prob(.33333333) replace condition_names(a b)
+complete_ra, prob(.33333333) replace conditions(a b)
 tab assign
-complete_ra treat, prob(.33333333) replace condition_names(a b)
+complete_ra treat, prob(.33333333) replace conditions(a b)
 tab treat
 	//ifs and bys
 	clear all
@@ -378,13 +378,13 @@ tab treat
 	tab assign  y, miss col
 	bysort y: complete_ra treat if y!=3, prob(.33333333) replace
 	tab treat  y, miss col
-	bysort y: complete_ra if y!=3, prob(.33333333) replace condition_names(21 22)
+	bysort y: complete_ra if y!=3, prob(.33333333) replace conditions(21 22)
 	tab assign  y, miss col
-	bysort y: complete_ra treat if y!=3, prob(.33333333) replace condition_names(21 22)
+	bysort y: complete_ra treat if y!=3, prob(.33333333) replace conditions(21 22)
 	tab treat  y, miss col
-	bysort y: complete_ra if y!=3, prob(.33333333) replace condition_names(a b)
+	bysort y: complete_ra if y!=3, prob(.33333333) replace conditions(a b)
 	tab assign  y, miss col
-	bysort y: complete_ra treat if y!=3, prob(.33333333) replace condition_names(a b)
+	bysort y: complete_ra treat if y!=3, prob(.33333333) replace conditions(a b)
 	tab treat  y, miss col
 	//ins 
 	clear all
@@ -400,13 +400,13 @@ tab treat
 	tab assign, miss
 	complete_ra treat in 20/80, prob(.33333333) replace
 	tab treat, miss
-	complete_ra in 20/80, prob(.33333333) replace condition_names(21 22)
+	complete_ra in 20/80, prob(.33333333) replace conditions(21 22)
 	tab assign, miss
-	complete_ra treat in 20/80, prob(.33333333) replace condition_names(21 22)
+	complete_ra treat in 20/80, prob(.33333333) replace conditions(21 22)
 	tab treat, miss
-	complete_ra in 20/80, prob(.33333333) replace condition_names(a b)
+	complete_ra in 20/80, prob(.33333333) replace conditions(a b)
 	tab assign, miss
-	complete_ra treat in 20/80, prob(.33333333) replace condition_names(a b)
+	complete_ra treat in 20/80, prob(.33333333) replace conditions(a b)
 	tab treat, miss
 		
 
@@ -422,13 +422,13 @@ complete_ra, prob_each(.25 .25 .5) replace
 tab assign
 complete_ra treat, prob_each(.25 .25 .5) replace
 tab treat
-complete_ra, prob_each(.25 .25 .5) replace condition_names(21 22 23)
+complete_ra, prob_each(.25 .25 .5) replace conditions(21 22 23)
 tab assign
-complete_ra treat, prob_each(.25 .25 .5) replace condition_names(21 22 23)
+complete_ra treat, prob_each(.25 .25 .5) replace conditions(21 22 23)
 tab treat
-complete_ra, prob_each(.25 .25 .5) replace condition_names(a b c)
+complete_ra, prob_each(.25 .25 .5) replace conditions(a b c)
 tab assign
-complete_ra treat, prob_each(.25 .25 .5) replace condition_names(a b c)
+complete_ra treat, prob_each(.25 .25 .5) replace conditions(a b c)
 tab treat
 clear all
 set obs 101
@@ -440,13 +440,13 @@ complete_ra, prob_each(.25 .75) replace
 tab assign
 complete_ra treat, prob_each(.25 .75) replace
 tab treat
-complete_ra, prob_each(.25 .75) replace condition_names(21 22 23)
+complete_ra, prob_each(.25 .75) replace conditions(21 22 23)
 tab assign
-complete_ra treat, prob_each(.25 .75) replace condition_names(21 22 23)
+complete_ra treat, prob_each(.25 .75) replace conditions(21 22 23)
 tab treat
-complete_ra, prob_each(.25 .75) replace condition_names(a b c)
+complete_ra, prob_each(.25 .75) replace conditions(a b c)
 tab assign
-complete_ra treat, prob_each(.25 .75) replace condition_names(a b c)
+complete_ra treat, prob_each(.25 .75) replace conditions(a b c)
 tab treat
 	//ifs and bys
 	clear all
@@ -462,25 +462,25 @@ tab treat
 	tab assign y, miss col
 	bysort y: complete_ra treat  if y!=3, prob_each(.25 .25 .5) replace
 	tab treat y, miss col
-	bysort y: complete_ra  if y!=3, prob_each(.25 .25 .5) replace condition_names(21 22 23)
+	bysort y: complete_ra  if y!=3, prob_each(.25 .25 .5) replace conditions(21 22 23)
 	tab assign y, miss col
-	bysort y: complete_ra treat  if y!=3, prob_each(.25 .25 .5) replace condition_names(21 22 23)
+	bysort y: complete_ra treat  if y!=3, prob_each(.25 .25 .5) replace conditions(21 22 23)
 	tab treat  y, miss col
-	bysort y: complete_ra  if y!=3, prob_each(.25 .25 .5) replace condition_names(a b c)
+	bysort y: complete_ra  if y!=3, prob_each(.25 .25 .5) replace conditions(a b c)
 	tab assign  y, miss col
-	bysort y: complete_ra treat  if y!=3, prob_each(.25 .25 .5) replace condition_names(a b c)
+	bysort y: complete_ra treat  if y!=3, prob_each(.25 .25 .5) replace conditions(a b c)
 	tab treat  y, miss col
 	bysort y: complete_ra   if y!=3, prob_each(.25 .75) replace
 	tab assign  y, miss col
 	bysort y: complete_ra treat   if y!=3, prob_each(.25 .75) replace
 	tab treat  y, miss col
-	bysort y: complete_ra   if y!=3, prob_each(.25 .75) replace condition_names(21 22 23)
+	bysort y: complete_ra   if y!=3, prob_each(.25 .75) replace conditions(21 22 23)
 	tab assign  y, miss col
-	bysort y: complete_ra treat   if y!=3, prob_each(.25 .75) replace condition_names(21 22 23)
+	bysort y: complete_ra treat   if y!=3, prob_each(.25 .75) replace conditions(21 22 23)
 	tab treat  y, miss col
-	bysort y: complete_ra   if y!=3, prob_each(.25 .75) replace condition_names(a b c)
+	bysort y: complete_ra   if y!=3, prob_each(.25 .75) replace conditions(a b c)
 	tab assign y, miss col
-	bysort y: complete_ra treat   if y!=3, prob_each(.25 .75) replace condition_names(a b c)
+	bysort y: complete_ra treat   if y!=3, prob_each(.25 .75) replace conditions(a b c)
 	tab treat y, miss col
 	//ins
 	clear all
@@ -493,13 +493,13 @@ tab treat
 	tab assign
 	complete_ra treat  in 20/80, prob_each(.25 .25 .5) replace
 	tab treat
-	complete_ra  in 20/80, prob_each(.25 .25 .5) replace condition_names(21 22 23)
+	complete_ra  in 20/80, prob_each(.25 .25 .5) replace conditions(21 22 23)
 	tab assign
-	complete_ra treat  in 20/80, prob_each(.25 .25 .5) replace condition_names(21 22 23)
+	complete_ra treat  in 20/80, prob_each(.25 .25 .5) replace conditions(21 22 23)
 	tab treat
-	complete_ra  in 20/80, prob_each(.25 .25 .5) replace condition_names(a b c)
+	complete_ra  in 20/80, prob_each(.25 .25 .5) replace conditions(a b c)
 	tab assign
-	complete_ra treat  in 20/80, prob_each(.25 .25 .5) replace condition_names(a b c)
+	complete_ra treat  in 20/80, prob_each(.25 .25 .5) replace conditions(a b c)
 	tab treat
 	clear all
 	set obs 101
@@ -511,13 +511,13 @@ tab treat
 	tab assign
 	complete_ra treat  in 20/80, prob_each(.25 .75) replace
 	tab treat
-	complete_ra  in 20/80, prob_each(.25 .75) replace condition_names(21 22 23)
+	complete_ra  in 20/80, prob_each(.25 .75) replace conditions(21 22 23)
 	tab assign
-	complete_ra treat  in 20/80, prob_each(.25 .75) replace condition_names(21 22 23)
+	complete_ra treat  in 20/80, prob_each(.25 .75) replace conditions(21 22 23)
 	tab treat
-	complete_ra  in 20/80, prob_each(.25 .75) replace condition_names(a b c)
+	complete_ra  in 20/80, prob_each(.25 .75) replace conditions(a b c)
 	tab assign
-	complete_ra treat  in 20/80, prob_each(.25 .75) replace condition_names(a b c)
+	complete_ra treat  in 20/80, prob_each(.25 .75) replace conditions(a b c)
 	tab treat
 
 
@@ -532,13 +532,13 @@ complete_ra, m_each(25 25 50) replace
 tab assign
 complete_ra treat, m_each(25 25 50) replace
 tab treat
-complete_ra, m_each(25 25 50) replace condition_names(21 22 23)
+complete_ra, m_each(25 25 50) replace conditions(21 22 23)
 tab assign
-complete_ra treat, m_each(25 25 50) replace condition_names(21 22 23)
+complete_ra treat, m_each(25 25 50) replace conditions(21 22 23)
 tab treat
-complete_ra, m_each(25 25 50) replace condition_names(a b c)
+complete_ra, m_each(25 25 50) replace conditions(a b c)
 tab assign
-complete_ra treat, m_each(25 25 50) replace condition_names(a b c)
+complete_ra treat, m_each(25 25 50) replace conditions(a b c)
 tab treat
 clear all
 set obs 100
@@ -550,13 +550,13 @@ complete_ra, m_each(25 75) replace
 tab assign
 complete_ra treat, m_each(25 75) replace
 tab treat
-complete_ra, m_each(25 75) replace condition_names(21 22 23)
+complete_ra, m_each(25 75) replace conditions(21 22 23)
 tab assign
-complete_ra treat, m_each(25 75) replace condition_names(21 22 23)
+complete_ra treat, m_each(25 75) replace conditions(21 22 23)
 tab treat
-complete_ra, m_each(25 75) replace condition_names(a b c)
+complete_ra, m_each(25 75) replace conditions(a b c)
 tab assign
-complete_ra treat, m_each(25 75) replace condition_names(a b c)
+complete_ra treat, m_each(25 75) replace conditions(a b c)
 tab treat
 
 
@@ -619,17 +619,17 @@ sim_RA, run(complete_ra, replace) reps(10000)
 //test labels 
 clear 
 set obs 100
-complete_ra, replace condition_names(a b)
+complete_ra, replace conditions(a b)
 tab assign
 tab assign, nolab
-complete_ra, prob_each(.1 .9) replace condition_names(a b)
+complete_ra, prob_each(.1 .9) replace conditions(a b)
 tab assign
 tab assign, nolab
-complete_ra, prob_each(.1 .9) replace condition_names(1 2)
+complete_ra, prob_each(.1 .9) replace conditions(1 2)
 tab assign
-complete_ra, prob_each(.1 .8 .1) replace condition_names(23 24 25)
+complete_ra, prob_each(.1 .8 .1) replace conditions(23 24 25)
 tab assign
-complete_ra, prob_each(.1 .8 .1) replace condition_names(a b c)
+complete_ra, prob_each(.1 .8 .1) replace conditions(a b c)
 tab assign
 tab assign, nolab
 
@@ -710,7 +710,7 @@ timer list 1
 *set obs 100
 *complete_ra treat, num_arms(1) replace 
 *complete_ra treat, m_each(100) replace 
-*complete_ra treat, condition_names(Treatment) 
+*complete_ra treat, conditions(Treatment) 
 
 
 
@@ -723,14 +723,14 @@ timer list 1
 
 
 
-complete_ra treat, m(30) condition_names(Control Treatment) replace
+complete_ra treat, m(30) conditions(Control Treatment) replace
 tab treat
 
 complete_ra treat, replace
 tab treat
 complete_ra treat, m(50) replace
 tab treat
-complete_ra treat, m_each(30 70) condition_names(control treatment) replace
+complete_ra treat, m_each(30 70) conditions(control treatment) replace
 tab treat
 
 set obs 101
@@ -750,7 +750,7 @@ expect_error, run(complete_ra, m(2) replace)
 complete_ra treat, num_arms(2) replace
 tab treat
 label list
-complete_ra treat, num_arms(2) condition_names(a b) replace
+complete_ra treat, num_arms(2) conditions(a b) replace
 tab treat
 
 
@@ -763,14 +763,14 @@ complete_ra treat, num_arms(3) replace
 tab treat
 	
 complete_ra treat, m_each(30 30 40) replace
-complete_ra treat, m_each(30 30 40) replace condition_names(control placebo treatment)
-complete_ra treat, replace condition_names(control placebo treatment)
+complete_ra treat, m_each(30 30 40) replace conditions(control placebo treatment)
+complete_ra treat, replace conditions(control placebo treatment)
 
 
 //special cases 
 clear 
 set obs 2
-complete_ra treat, m_each(1 0 1) condition_names(control placebo treatment) replace
+complete_ra treat, m_each(1 0 1) conditions(control placebo treatment) replace
 
 clear
 set obs 1

@@ -13,8 +13,8 @@
 
 {pstd} 
 {cmd:block_and_cluster_ra} [{it:treatvar}] {cmd:, }
-{opt cluster_var:(var)}
-{opt block_var:(var)}
+{opt clusters:(var)}
+{opt blocks:(var)}
 [{opt block_m:(numlist)}
 {opt block_m_each:(matrix)}
 {opt block_prob_each:(matrix)}
@@ -23,7 +23,7 @@
 {opt prob:(num)}
 {opt prob_each:(numlist)}
 {opt num_arms:(num)}
-{opt condition_names:(string)}
+{opt conditions:(string)}
 {opt replace}
 {opt skip_check_inputs}]
 
@@ -37,7 +37,7 @@
 
 {pstd} {opt clustervar:(var)} The variable that indicates which cluster each unit belongs to. Can be a string or numeric variable.{p_end}
 
-{pstd} {opt block_var:(var)} An existing variable that indicates which block each unit belongs to. Can be a string or numeric variable. {p_end} 
+{pstd} {opt blocks:(var)} An existing variable that indicates which block each unit belongs to. Can be a string or numeric variable. {p_end} 
 
 {pstd} {opt m:(num)} Use for a two-arm design in which the scalar m describes the fixed number of clusters to assign in each block. This number does not vary across blocks. {p_end} 
 
@@ -47,7 +47,7 @@ that is as long as the number of blocks. {p_end}
 {pstd} {opt block_m_each:(matrix)} Use for a multi-arm design in which the values of block_m_each determine the number of clusters assigned to each condition. 
 block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of clusters to be 
 assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by a tabulate command. The columns should 
-be in the order of condition_names, if specified. {p_end} 
+be in the order of conditions, if specified. {p_end} 
 
 {pstd} {opt block_prob_each:(matrix)} Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. 
 block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment 
@@ -68,7 +68,7 @@ the total must sum to 1. Because of integer issues, the exact number of clusters
 differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each.{p_end}
  
 {pstd} {opt num_arms:(num)} The number of treatment arms. If unspecified, num_arms will be determined from the other arguments.{p_end} 
-{pstd} {opt condition_names:(string)} A string list giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) 
+{pstd} {opt conditions:(string)} A string list giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) 
 in a two-arm trial and 1, 2, 3, in a multi-arm trial. 
 An execption is a two-group design in which num_arms is set to 2, in which case the condition names are 1 and 2, as in a multi-arm trial with two arms.{p_end} 
 {pstd} {opt replace} If treatvar exists in dataset, the command replaces it.{p_end}
@@ -85,11 +85,11 @@ An execption is a two-group design in which num_arms is set to 2, in which case 
 {pstd} {inp:. replace block="block_3" if cluster>10 & cluster<=15 }{p_end}
 {pstd} {inp:. replace block="block_4" if cluster>15 & cluster<=20}{p_end}
 {pstd} {inp:. replace block="block_5" if cluster>20 & cluster<=26 }{p_end}
-{pstd} {inp:. block_and_cluster_ra, block_var(block) cluster_var(cluster) }{p_end}
-{pstd} {inp:. block_and_cluster_ra, block_var(block) cluster_var(cluster) num_arms(3) replace }{p_end}
-{pstd} {inp:. block_and_cluster_ra, block_var(block) cluster_var(cluster) prob_each(.2 .5 .3) replace }{p_end}
+{pstd} {inp:. block_and_cluster_ra, blocks(block) clusters(cluster) }{p_end}
+{pstd} {inp:. block_and_cluster_ra, blocks(block) clusters(cluster) num_arms(3) replace }{p_end}
+{pstd} {inp:. block_and_cluster_ra, blocks(block) clusters(cluster) prob_each(.2 .5 .3) replace }{p_end}
 {pstd} {inp:. matrix define block_m_each=(2, 3\1,4\3,2\2,3\4,1) }{p_end}
-{pstd} {inp:. block_and_cluster_ra, block_var(block) cluster_var(cluster) block_m_each(block_m_each) replace }{p_end}
+{pstd} {inp:. block_and_cluster_ra, blocks(block) clusters(cluster) block_m_each(block_m_each) replace }{p_end}
 
 
 {title:Authors}

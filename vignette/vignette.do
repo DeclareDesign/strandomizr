@@ -104,7 +104,7 @@ tab Z
 /***
 You can also name your treatment arms.
 ***/
-simple_ra Z, replace prob_each(.2 .2 .6) condition_names(control placebo treatment)
+simple_ra Z, replace prob_each(.2 .2 .6) conditions(control placebo treatment)
 tab Z
 	   
 /***
@@ -145,7 +145,7 @@ tab Z
 /***
 You can also name your treatment arms.
 ***/
-complete_ra Z, m_each(100 200 292) replace condition_names(control placebo treatment)
+complete_ra Z, m_each(100 200 292) replace conditions(control placebo treatment)
 tab Z
 /***
 ###Simple and Complete Random Assignment Compared
@@ -257,21 +257,21 @@ weights (IPW), in which
 units are weighted by the inverse of the probability that the unit is in the 
 condition that it is in.
 
-The only required argument to block_ra is block_var, which is a variable that 
+The only required argument to block_ra is blocks, which is a variable that 
 describes which block 
-a unit belongs to. block_var can be a string or numeric variable. If no other 
+a unit belongs to. blocks can be a string or numeric variable. If no other 
 arguments are specified, 
 block_ra assigns an approximately equal proportion of each block to treatment.
 ***/
-block_ra Z, block_var(Hair) replace
+block_ra Z, blocks(Hair) replace
 tab Z Hair
 /***
 For multiple treatment arms, use the num_arms argument, with or without the 
-condition_names argument
+conditions argument
 ***/
-block_ra Z, block_var(Hair) num_arms(3) replace
+block_ra Z, blocks(Hair) num_arms(3) replace
 tab Z Hair
-block_ra Z, block_var(Hair) condition_names(Control Placebo Treatment) replace
+block_ra Z, blocks(Hair) conditions(Control Placebo Treatment) replace
 tab Z Hair
 /***
 block_ra provides a number of ways to adjust the number of subjects assigned to 
@@ -283,14 +283,14 @@ block; the appropriate
 number of units to assign to treatment within each block is automatically 
 determined.			
 ***/
-block_ra Z, block_var(Hair) prob_each(.3 .7) replace
+block_ra Z, blocks(Hair) prob_each(.3 .7) replace
 tab Z Hair
 /***
 For finer control, use the block_m_each argument, which takes a matrix with as 
 many rows as there are 
 blocks, and as many columns as there are treatment conditions. Remember that the
  rows are in the same 
-order as seen in tab block_var, a command that is good to run before 
+order as seen in tab blocks, a command that is good to run before 
 constructing a block_m_each 
 matrix. The matrix can either be defined using the matrix define command or be 
 inputted directly into
@@ -299,9 +299,9 @@ the block_m_each option.
 tab Hair 
 matrix define block_m_each=(78, 30\186, 100\51, 20\87,40)
 matrix list block_m_each
-block_ra Z, replace block_var(Hair) block_m_each(block_m_each)
+block_ra Z, replace blocks(Hair) block_m_each(block_m_each)
 tab Z Hair 
-block_ra Z, replace block_var(Hair) block_m_each(78, 30\186, 100\51, 20\87,40)
+block_ra Z, replace blocks(Hair) block_m_each(78, 30\186, 100\51, 20\87,40)
 tab Z Hair 	
 /***
 Clustered Assignment
@@ -327,16 +327,16 @@ is equal to the number of subjects. Almost all cluster-assigned experiments fall
 somewhere in the middle 
 of these two extremes.
 
-The only required argument for the cluster_ra function is the clust_var 
+The only required argument for the cluster_ra function is the clusters 
 argument, which indicates which 
 cluster each subject belongs to. Let's pretend that for some reason, we have to 
 assign treatments 
 according to the unique combinations of hair color, eye color, and gender.
 ***/
-egen clust_var=group(Hair Eye Sex)
-tab clust_var
-cluster_ra Z_clust, cluster_var(clust_var) 
-tab clust_var Z_clust
+egen clusters=group(Hair Eye Sex)
+tab clusters
+cluster_ra Z_clust, clusters(clusters) 
+tab clusters Z_clust
 /***
 This shows that each cluster is either assigned to treatment or control. No two 
 units within the same 
@@ -345,20 +345,20 @@ cluster are assigned to different conditions.
 As with all functions in randomizr, you can specify multiple treatment arms in a 
 variety of ways:
 ***/
-cluster_ra Z_clust, cluster_var(clust_var) num_arms(3) replace
-tab clust_var Z_clust
+cluster_ra Z_clust, clusters(clusters) num_arms(3) replace
+tab clusters Z_clust
 /***
-...or using condition_names. 
+...or using conditions. 
 ***/
-cluster_ra Z_clust, cluster_var(clust_var) condition_names(control placebo treatment)  replace
-tab clust_var Z_clust
+cluster_ra Z_clust, clusters(clusters) conditions(control placebo treatment)  replace
+tab clusters Z_clust
 /***
 ... or using m_each, which describes how many clusters should be assigned to 
 each condition. m_each must 
 sum to the number of clusters.
 ***/
-cluster_ra Z_clust, cluster_var(clust_var) m_each(5 15 12) replace
-tab clust_var Z_clust
+cluster_ra Z_clust, clusters(clusters) m_each(5 15 12) replace
+tab clusters Z_clust
 /***
 Block and Clustered Assignment
 -------------------------- 
@@ -370,9 +370,9 @@ nested within discrete schools.
 
 As an example, let's group our clusters into blocks by size	
 ***/
-bysort clust_var: egen cluster_size=count(_n)
-block_and_cluster_ra Z, block_var(cluster_size) cluster_var(clust_var) replace
-tab clust_var Z
+bysort clusters: egen cluster_size=count(_n)
+block_and_cluster_ra Z, blocks(cluster_size) clusters(clusters) replace
+tab clusters Z
 tab cluster_size Z 
 qui log c
 
