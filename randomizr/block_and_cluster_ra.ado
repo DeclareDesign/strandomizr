@@ -10,7 +10,7 @@
 *****version 1.1*********************
 ***john.ternovski@yale.edu***********
 program define block_and_cluster_ra, rclass sortpreserve
-	version 15
+	version 12
 	syntax [namelist(max=1 name=assignment)] [if] [in], clusters(varname) blocks(varname) [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [block_m(numlist >=0)] [block_m_each(string)] [block_prob(numlist >=0 <=1)] [block_prob_each(string)] [num_arms(numlist max=1 >0)] [conditions(string)] [m(numlist max=1 >=0 int)] [skip_check_inputs] [replace]
 
 //error-checking 

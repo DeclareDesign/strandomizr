@@ -11,7 +11,7 @@
 ***john.ternovski@yale.edu***********
 
 program define simple_ra
-	version 15
+	version 12
 	syntax [namelist(max=1 name=assignment)] [if] [in], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [conditions(string)] [check_inputs] [replace]
 
 //determine if condition names are strings or numbers

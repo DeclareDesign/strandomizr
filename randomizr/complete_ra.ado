@@ -10,7 +10,7 @@
 *****version 1.8*********************
 ***john.ternovski@yale.edu***********
 program define complete_ra, rclass byable(recall)
-	version 15
+	version 12
 	syntax [namelist(max=1 name=assignment)] [if] [in], [prob(numlist max=1 >=0 <=1)] [prob_each(numlist >=0 <=1)] [num_arms(numlist max=1 >0)] [conditions(string)] [m(numlist max=1 >=0 int)] [m_each(numlist >=0 int)] [skip_check_inputs] [replace]
 
 	
@@ -390,7 +390,7 @@ end
 
 ///TWO ARM RANDOM ASSIGNMENT FUNCTION
 program define two_arm_random_assign_func
-	version 15
+	version 12
 	syntax [namelist(name=assignment)] [if] [in], [customnum(numlist)] [conditions(string)] [m(numlist)]
 
 tempvar rand rank 
@@ -412,7 +412,7 @@ end
 
 ///MULTI ARM RANDOM ASSIGNMENT FUNCTION
 program define multi_arm_random_assign_func, rclass
-version 15
+version 12
 syntax namelist(name=assignment) [if] [in], m_each(numlist) [rank(varlist)]
 	
 if missing(`"`rank'"') {
