@@ -50,11 +50,20 @@ expect_error, run(complete_ra, m_each(10.1 90.9) replace)
 //prob_each tests
 expect_error, run(complete_ra, prob_each(.2 .7) replace) 
 expect_error, run(complete_ra, prob_each(.301 .7) replace) 
-expect_error, run(complete_ra, prob_each(.5 .9 -.4) replace) 
+expect_error, run(complete_ra, prob_each(.5 .9 -.4) replace)
 
 //condition names tests
 expect_error, run(complete_ra, prob_each(.3 .7) replace conditions(1)) 
 expect_error, run(complete_ra, prob_each(.3 .7) replace conditions(1 1)) 
+expect_error, run(complete_ra, m(10) replace conditions(1 2 3)) 
+expect_error, run(complete_ra, m(10) replace conditions(1)) 
+expect_error, run(complete_ra, m_each(10 10 81) conditions(1 2 3 4) replace) 
+expect_error, run(complete_ra, m_each(10 10 81) conditions(1) replace) 
+expect_error, run(complete_ra, prob(0.5) conditions(1 2 3) replace) 
+expect_error, run(complete_ra, prob(0.5) conditions(1) replace)
+expect_error, run(complete_ra, prob_each(.3 .7) conditions(1 2 3) replace) 
+expect_error, run(complete_ra, prob_each(.3 .7) conditions(1) replace) 
+
 
 
 

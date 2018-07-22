@@ -7,7 +7,7 @@
 ****Yale University******************
 *************************************
 ****12sep2017************************
-*****version 1.8*********************
+*****version 1.9*********************
 ***john.ternovski@yale.edu***********
 program define complete_ra, rclass byable(recall)
 	version 12
@@ -96,22 +96,58 @@ if "`skip_check_inputs'"=="" {
 		disp as error "ERROR: You must specify only ONE of the following options: prob, prob_each, block_m, block_m_each, block_prob, num_arms, m"
 		exit 1
 	}
-	//check have enough condition names
-	if !missing(`"`conditions'"') {
-		if `num_arms'>wordcount(`"`conditions'"') {
-			disp as error "ERROR: You specified too few condition names"
+	
+	//check if number of treatment arms and number of condition names match
+	if !missing(`"`m'"') & !missing(`"`conditions'"') {
+		if wordcount(`"`conditions'"') != 2 {
+			disp as error "ERROR: If m and conditions are specified together, conditions must be of length 2."
 			exit 2
 		}
 	}
 	
+	if !missing(`"`prob'"') & !missing(`"`conditions'"') {
+		if wordcount(`"`conditions'"') != 2 {
+			disp as error "ERROR: If prob and conditions are specified together, conditions must be of length 2."
+			exit 3
+		}
+	}
+		
+	if !missing(`"`m_each'"') & !missing(`"`conditions'"') {
+		if `num_arms'>wordcount(`"`conditions'"') |  `num_arms'<wordcount(`"`conditions'"') {
+			disp as error "ERROR:  If m_each and conditions are specified together, they must be of the same length."
+			exit 4
+		}
+	}
+	
+	if !missing(`"`prob_each'"') & !missing(`"`conditions'"') {
+		if `num_arms'>wordcount(`"`conditions'"') |  `num_arms'<wordcount(`"`conditions'"') {
+			disp as error "ERROR:  If prob_each and conditions are specified together, they must be of the same length."
+			exit 5
+		}
+	}
+	
+	if !missing(`"`conditions'"') {
+		if `num_arms'<wordcount(`"`conditions'"') {
+			disp as error "ERROR: You specified too many condition names given the number of treatment arms"
+			exit 6
+		}
+	}
+	
+	if !missing(`"`conditions'"') {
+		if `num_arms'>wordcount(`"`conditions'"') {
+			disp as error "ERROR: You specified too few condition names given the number of treatment arms"
+			exit 7
+		}
+	}
+	
+	//probs add up to 1
 	if !missing(`"`prob_each'"'){
-		//probs add up to 1
 		tempname probs
 		matrix input `probs' = (`prob_each')
 		mata : st_local("sum",strofreal(rowsum(st_matrix(st_local("probs")))))
 		if 1!=`sum' {
 			disp as error "ERROR: Percentages in group_percentages must add up to 1"
-			exit 3
+			exit 8
 		}
 	}
 	
@@ -121,8 +157,8 @@ if "`skip_check_inputs'"=="" {
 		matrix input `m_each_mat' = (`m_each')
 		mata : st_local("sum",strofreal(rowsum(st_matrix(st_local("m_each_mat")))))
 		if `N'!=`sum' {
-			disp as error "ERROR: Group numbers in m_eache must add up to the total sample size"
-			exit 4
+			disp as error "ERROR: Group numbers in m_each must add up to the total sample size"
+			exit 9
 		}
 	}
 	
@@ -130,7 +166,7 @@ if "`skip_check_inputs'"=="" {
 	if !missing(`"`m'"') {
 		if `m'>`N' {
 			disp as error "ERROR: m must not exceed N."
-			exit 5
+			exit 10
 		}
 	}
 	
@@ -139,7 +175,7 @@ if "`skip_check_inputs'"=="" {
 		foreach n in `conditions' {
 			if strpos(`"`conditions'"',`"`n'"')!=strrpos(`"`conditions'"',`"`n'"') {
 				disp as error "ERROR: All condition names have to be unique."
-				exit 6
+				exit 11
 			}
 		}
 	}
