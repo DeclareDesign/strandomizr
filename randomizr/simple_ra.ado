@@ -6,11 +6,9 @@
 ****Alex Coppock*********************
 ****Yale University******************
 *************************************
-****17sep2017************************
-*****version 1.5********************
+****25july2018************************
+*****version 1.6********************
 ***john.ternovski@yale.edu***********
-
-* Test comment
 
 program define simple_ra
 	version 12
@@ -45,6 +43,69 @@ if !missing(`"`conditions'"') & missing(`"`num_arms'"') {
 //set indexing
 if `num_arms'==2 & (!missing(`"`withlabel'"') | missing(`"`conditions'"')) {
 	local index0=1
+}
+
+// Error checking
+	if "`check_inputs'"=="" {
+		//check for incompatible combinations of commands
+		local commandlist="prob prob_each"
+		local commandnum=0
+		foreach n in `commandlist' {
+			local commandnum=`commandnum'+ !missing(`"``n''"')
+		}
+		if `commandnum'>1 {
+			disp as error "ERROR: Please specify only one of prob and prob_each."
+			exit 1
+	}
+
+	// Probabilities add up to 1
+	if !missing(`"`prob_each'"'){
+		tempname probs
+		matrix input `probs' = (`prob_each')
+		mata : st_local("sum",strofreal(rowsum(st_matrix(st_local("probs")))))
+		if 1!=`sum' {
+			disp as error "ERROR: The sum of the probabilities of assignment to each condition (prob_each) must equal 1."
+			exit 2
+		}
+	}
+	
+	if !missing(`"`prob_each'"') & !missing(`"`conditions'"') {
+		if `num_arms'>wordcount(`"`conditions'"') |  `num_arms'<wordcount(`"`conditions'"') {
+			disp as error "ERROR:  If prob_each and conditions are specified together, they must be of the same length."
+			exit 4
+		}
+	}
+	
+	if !missing(`"`conditions'"') {
+		if `num_arms'<wordcount(`"`conditions'"') {
+			disp as error "ERROR: You specified too many condition names given the number of treatment arms"
+			exit 5
+		}
+	}
+	
+	if !missing(`"`conditions'"') {
+		if `num_arms'>wordcount(`"`conditions'"') {
+			disp as error "ERROR: You specified too few condition names given the number of treatment arms"
+			exit 6
+		}
+	}
+	
+	//check if number of treatment arms and number of condition names match
+	if !missing(`"`prob'"') & !missing(`"`conditions'"') {
+		if wordcount(`"`conditions'"') != 2 {
+			disp as error "ERROR: If prob and conditions are specified together, conditions must be of length 2."
+			exit 7
+		}
+	}
+	
+	//check condition names are unique 
+	if !missing(`"`conditions'"') {
+		foreach n in `conditions' {
+			if strpos(`"`conditions'"',`"`n'"')!=strrpos(`"`conditions'"',`"`n'"') {
+				disp as error "ERROR: All condition names have to be unique."
+				exit 8
+			}
+		}
 }
 
 //replace assignment variable and label if replace is specified

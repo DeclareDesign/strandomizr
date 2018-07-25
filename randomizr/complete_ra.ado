@@ -146,7 +146,7 @@ if "`skip_check_inputs'"=="" {
 		matrix input `probs' = (`prob_each')
 		mata : st_local("sum",strofreal(rowsum(st_matrix(st_local("probs")))))
 		if 1!=`sum' {
-			disp as error "ERROR: Percentages in group_percentages must add up to 1"
+			disp as error "ERROR: Percentages in prob_each must add up to 1"
 			exit 8
 		}
 	}
