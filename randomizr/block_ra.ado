@@ -129,12 +129,50 @@ if "`skip_check_inputs'"=="" {
 	}
 	
 	//check condition names comports to other option 
+	
+	if !missing(`"`m'"') & !missing(`"`conditions'"') {
+		if wordcount(`"`conditions'"') != 2 {
+			disp as error "ERROR: If m and conditions are specified together, conditions must be of length 2."
+			exit 2
+		}
+	}
+	
+	if !missing(`"`prob'"') & !missing(`"`conditions'"') {
+		if wordcount(`"`conditions'"') != 2 {
+			disp as error "ERROR: If prob and conditions are specified together, conditions must be of length 2."
+			exit 3
+		}
+	}
+	
+	if !missing(`"`block_m'"') & !missing(`"`conditions'"') {
+		if wordcount(`"`conditions'"') != 2  {
+			disp as error "ERROR:  If block_m and conditions are specified together, conditions must be of length 2."
+			exit 4
+		}
+	}
+	
+	if !missing(`"`block_prob'"') & !missing(`"`conditions'"') {
+		if wordcount(`"`conditions'"') != 2  {
+			disp as error "ERROR:  If block_prob and conditions are specified together, conditions must be of length 2."
+			exit 5
+		}
+	}
+	
+	if (!missing(`"`prob_each'"')) & !missing(`"`conditions'"') {
+		local margs=wordcount(`"`prob_each'"')
+		local cargs=wordcount(`"`conditions'"')
+		if `margs'!=`cargs' {
+			disp as error "ERROR:  If prob_each and conditions are specified together, they must be of the same length."
+			exit 6
+		}
+	}
+	
 	if (!missing(`"`m'"') | !missing(`"`prob'"') | !missing(`"`block_m'"') | !missing(`"`block_prob'"')) ///
 	& !missing(`"`conditions'"') {
 		local cargs=wordcount(`"`conditions'"')
 		if 2>`cargs' {
 			disp as error "ERROR: You specified too few condition names"
-			exit 2
+			exit 7
 		}
 	}
 	if (!missing(`"`prob_each'"')) & !missing(`"`conditions'"') {
@@ -142,7 +180,7 @@ if "`skip_check_inputs'"=="" {
 		local cargs=wordcount(`"`conditions'"')
 		if `margs'>`cargs' {
 			disp as error "ERROR: You specified too few condition names"
-			exit 2
+			exit 8
 		}
 	}
 	if (!missing(`"`testmatrix'"')) & !missing(`"`conditions'"') {
@@ -150,14 +188,24 @@ if "`skip_check_inputs'"=="" {
 		local cargs=wordcount(`"`conditions'"')
 		if `margs'>`cargs' {
 			disp as error "ERROR: You specified too few condition names"
-			exit 2
+			exit 9
 		}
 	}
 	if !missing(`"`num_arms'"') & !missing(`"`conditions'"') {
 		local cargs=wordcount(`"`conditions'"')
 		if `num_arms'>`cargs' {
 			disp as error "ERROR: You specified too few condition names"
-			exit 2
+			exit 10
+		}
+	}
+	
+	//check condition names are unique 
+	if !missing(`"`conditions'"') {
+		foreach n in `conditions' {
+			if strpos(`"`conditions'"',`"`n'"')!=strrpos(`"`conditions'"',`"`n'"') {
+				disp as error "ERROR: All condition names have to be unique."
+				exit 11
+			}
 		}
 	}
 

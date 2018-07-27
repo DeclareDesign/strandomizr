@@ -58,7 +58,7 @@ expect_error, run(block_ra, blocks(y) block_prob(.1 .9 .3) replace)
 expect_error, run(block_ra, blocks(y) block_prob(.1) replace)
 expect_error, run(block_ra, blocks(y) block_prob(.1 .9) conditions(a a) replace)
 expect_error, run(block_ra, blocks(y) block_prob(.1 .9) conditions(a) replace)
-
+expect_error, run(block_ra, blocks(y) block_prob(.1 .9) conditions(a b c) replace)
 
 
 clear all
