@@ -56,6 +56,7 @@ if `num_arms'==2 & (!missing(`"`withlabel'"') | missing(`"`conditions'"')) {
 		if `commandnum'>1 {
 			disp as error "ERROR: Please specify only one of prob and prob_each."
 			exit 1
+		}
 	}
 
 	// Probabilities add up to 1
